@@ -1,0 +1,11 @@
+{
+  "name": "httpquery",
+  "fullName": "HTTPQuery",
+  "id": "jid1-grPOMMaS36Oibw",
+  "description": "Allows HTTP queries to obtain subsets of remote HTML data via XPath or CSS Selectors",
+  "contributors": [],
+  "url": "",
+  "author": "brettz9",
+  "license": "MPL 2.0",
+  "version": "0.1"
+}
