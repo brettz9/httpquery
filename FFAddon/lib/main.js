@@ -35,9 +35,6 @@ var modifyRequest,
     },
     checkQueryServerSupport = function (header, queryType) {
         var queryServerSupport = (/^query-server-support:\s*(.*?)\s*(?:\;|$)/mi).exec(header);
-console.log('header:'+header);
-console.log('qss:'+queryServerSupport);
-console.log('queryType:'+queryType);
         return queryServerSupport && (
             !queryType || (queryServerSupport[1].split(/\s+/).indexOf(queryType) > -1)
         );
@@ -261,7 +258,6 @@ exports.main = function() {
                         }
                         */
                         if (queryServerSupport) { // Already succeeded to get appropriate query result
-console.log('supposed success:'+resp.text.length);
                             markup = resp.text;
                             handleMarkup(markup);
                         }
@@ -286,7 +282,7 @@ console.log('supposed success:'+resp.text.length);
         // We check whether the page has already been loaded (and so we can
         //   inspect its header info so as to know whether the query protocol
         //   is supported).
-        console.log('URL:'+url);
+        // console.log('URL:'+url);
         // url, supported, notSupported, noEntry
         checkCachePerSupport(url, makeNewRequest, queryNotSupportedDocument, makeNewRequest, queryType);
     });
