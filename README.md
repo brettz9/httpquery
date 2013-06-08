@@ -3,8 +3,10 @@ httpquery
 
 *HTTP query protocol with proof-of-concept implementations obtaining
 subsets of remote HTML data via XPath or CSS Selectors, essentially
-working like an XML database, but allowing use of medium-sized static
-files*
+providing the likes of a native XML database, but without need for any
+importing of data (the server will simply read your static HTML/XML files
+on demand and deliver a subset of this data as queried by the user
+or application).
 
 Components
 ==========
