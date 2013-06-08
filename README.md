@@ -12,10 +12,10 @@ Components
 ==========
 
 HTTPQuery is an *experimental* protocol with the following tools:
-* proof-of-concept Firefox addon (web app to
+* Proof-of-concept **Firefox addon** (web app to
 come) to allow remote HTTPQueries without access
 restrictions
-* Node.js file handler implementation to allow remote queries to
+* **Node.js server file handler implementation** to allow remote queries to
 be made to obtain subsets of HTML or XML data via XPath or CSS selector
 syntax (currently XPath is for XML/XHTML only; CSS Selectors for HTML only?).
 Static HTML/XML files can be read from the desktop before
@@ -43,8 +43,9 @@ implementation are meant to provide users and developers with
 a means to overcome these barriers and limitations by letting your
 users by default query any document that you allow in the manner
 they wish, and with the default behavior allowing you to keep your
-data in simple static files, such as arbitrary HTML files or HTML
-files shaped in a manner more familiar to traditional databases (e.g., a
+data in simple static files, such as arbitrary HTML files or, on
+the other hand, HTML files shaped in a manner more similar
+in structure to traditional simpler databases (e.g., an HTML
 file consisting solely of a single table, hierarchical list, etc.).
 
 Other possible uses may include selective spidering.
