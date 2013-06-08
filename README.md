@@ -2,7 +2,9 @@ httpquery
 =========
 
 *HTTP query protocol with proof-of-concept implementations obtaining
-subsets of remote HTML data via XPath or CSS Selectors*
+subsets of remote HTML data via XPath or CSS Selectors, essentially
+working like an XML database, but allowing use of medium-sized static
+files*
 
 Components
 ==========
@@ -35,8 +37,13 @@ are often hamstrung by developer decisions, as they are not usually
 empowered to run arbitrary queries.
 
 This HTTP Query protocol, with reference Node.js and Firefox client
-implementation are meant to provide users with a means to overcome
-these barriers and limitations.
+implementation are meant to provide users and developers with
+a means to overcome these barriers and limitations by letting your
+users by default query any document that you allow in the manner
+they wish, and with the default behavior allowing you to keep your
+data in simple static files, such as arbitrary HTML files or HTML
+files shaped in a manner more familiar to traditional databases (e.g., a
+file consisting solely of a single table, hierarchical list, etc.).
 
 Other possible uses may include selective spidering.
 
