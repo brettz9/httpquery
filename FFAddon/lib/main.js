@@ -273,7 +273,7 @@ exports.main = function() {
                         }
                     }
                 };
-                requestObj.headers['query-' + queryType + '-request'] = query;
+                requestObj.headers['query-request-' + queryType] = query;
                 if (userFormat === 'json') {
                     requestObj.headers['query-format'] = 'json';
                 }

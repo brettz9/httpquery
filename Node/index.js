@@ -30,7 +30,7 @@ http.createServer(function (req, res) {
         isXHTML = url.match(/\.xhtml/),
         isXML = url.match(/\.xml/),
         isTEI = url.match(/\.tei/),
-        isHTML = !(isXHTML || isXML || isTEI), // Use this later if responding to XML vs. HTML differently
+        isHTML = !(isXHTML || isXML || isTEI),
         isJSON = req.headers['query-format'] === 'json',
         resultContentType = (isXHTML ? 'application/xhtml+xml' :
                                     isXML ? 'application/xml' :
@@ -45,7 +45,7 @@ http.createServer(function (req, res) {
         responseHeaders['query-content-type'] = resultContentType;
     }
     
-    if (req.headers['query-client-support'] && !req.headers['query-xpath1-request'] && !req.headers['query-css3-request'] && !req.headers['query-full-request']) {
+    if (req.headers['query-client-support'] && !req.headers['query-request-xpath1'] && !req.headers['query-request-css3'] && !req.headers['query-full-request']) {
         responseHeaders['query-server-support'] = 'xpath1 css3';
         write(res, 200, responseHeaders, ''); // Don't waste bandwidth if client supports protocol and hasn't asked us to deliver the full document
         // Todo: we should allow delivery of a default payload (e.g., full doc if not specified as requesting empty for feature detection+immediate execution if supported)
@@ -67,17 +67,24 @@ http.createServer(function (req, res) {
                 return arr.map(function (node) {
                     return node.toString();
                 });
+            },
+            wrapFragment = function (frag) {
+                if (isHTML) { // || queryResult.length <= 1) { // No need to wrap for HTML or single result sets as no well-formedness requirements
+                    return frag;
+                }
+                var tag = 'div xmlns="http://www.w3.org/1999/xhtml"';
+                return '<' + tag + '>' + frag + '</' + tag.match(/^\w*/)[0] + '>';
             };
-        if (clientXPath1Support && req.headers['query-xpath1-request'] && !req.headers['query-full-request']) {
+        if (/*clientXPath1Support &&*/ req.headers['query-request-xpath1'] && !req.headers['query-full-request']) {
             doc = new Dom().parseFromString(String(fileContents));
-            xpath1Request = req.headers['query-xpath1-request'] && req.headers['query-xpath1-request'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
+            xpath1Request = req.headers['query-request-xpath1'] && req.headers['query-request-xpath1'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
             queryResult = xpath.select(xpath1Request, doc);
-            queryResult = isJSON ? nodeArrayToHTMLArray(queryResult) : nodeArrayToHTMLArray(queryResult).join('');
+            queryResult = isJSON ? nodeArrayToHTMLArray(queryResult) : wrapFragment(nodeArrayToHTMLArray(queryResult).join(''));
         }
-        else if (clientCSS3Support && req.headers['query-css3-request'] && !req.headers['query-full-request']) {
+        else if (/*clientCSS3Support &&*/ req.headers['query-request-css3'] && !req.headers['query-full-request']) {
             // Support our own custom :text() and :attr(...) pseudo-classes (todo: do as (two-colon) pseudo-elements instead)
             $ = cheerio.load(String(fileContents));
-            css3RequestFull = req.headers['query-css3-request'] && req.headers['query-css3-request'].trim().match(/(.*?)(?:\:(text|attr)\(([^\)]*)\))?$/); // Allow explicit "html" (toString) or "toArray" (or "json")?
+            css3RequestFull = req.headers['query-request-css3'] && req.headers['query-request-css3'].trim().match(/(.*?)(?:\:(text|attr)\(([^\)]*)\))?$/); // Allow explicit "html" (toString) or "toArray" (or "json")?
             css3Request = css3RequestFull[1];
             type = css3RequestFull[2] || (isJSON ? 'toArray' : 'toString');
             css3Attr = css3RequestFull[3];
@@ -96,7 +103,8 @@ http.createServer(function (req, res) {
                     queryResult = $(css3Request).attr(css3Attr);
                     break;
                 case 'toArray':
-                    queryResult = nodeArrayToHTMLArray($(css3Request)); // $(css3Request).toString(); handles merging
+                    queryResult = $(css3Request); // Don't merge with next line as intermediate queryResult may be needed
+                    queryResult = wrapFragment(nodeArrayToHTMLArray(queryResult)); // $(css3Request).toString(); handles merging
                     break;
                 // Todo: Change 'text' to return array of text nodes in case of JSON?
                 case 'text': case 'toString':
