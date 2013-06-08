@@ -98,7 +98,7 @@ Ideas for possible future todos
     * Store user access in simple text file and use to check along with BrowserID (not related to protocol but another "powerful-by-default" feature)
 1. Add-on todos:
     * Confirm why queries aren't working for some sites and respond accordingly? (e.g., Yahoo and StackOverflow are detecting automatic Ajax header?)
-    * Allow JSON format to be displayed as actual application/json content-type
+    * Allow JSON format to be displayed as actual application/json content-type (and XML as application/xml)
     * Query input
         * XPath (or CSS Sel.) syntax coloring? (also update regex coloring for CodeMirror!)
         * XPath (or CSS Sel.) with auto-complete based on header-associated schema (including for HTML-treated-as-XML?) or at least general awareness of language/content-type (HTML/XML)
