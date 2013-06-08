@@ -6,7 +6,7 @@ subsets of remote HTML data via XPath or CSS Selectors, essentially
 providing the likes of a native XML database, but without need for any
 importing of data (the server will simply read your static HTML/XML files
 on demand and deliver a subset of this data as queried by the user
-or application).
+or application).*
 
 Components
 ==========
