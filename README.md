@@ -34,7 +34,24 @@ creators. The Web IS a database, and it is about time that
 its data becomes opened--for the humblest content creator
 to experienced mashup developers.
 
+While the first goal is to allow regular website content creators to
+have their content available to searches--with HTML/XML being
+the inevitable document-centric format, JSON support (via
+JSONPath / RQL?) is also envisaged.
+
+It is also hoped, whether through minor markup changes to schema
+attachment, intelligent widgets may become more of a norm in exposing
+sophisticated, offlineable, type-aware and paginated widgets which do
+not depend on the content creator being themselves a developer for
+this functionality to be made available to users.
+
+Other possible uses may include selective spidering.
+
 See the todos for more future goals for the project.
+
+FAQ
+====
+* Why require headers rather than GET-friendly bookmarkable/shareable request parameters?* - I wanted the protocol to be able to overlay any dynamic as well as static system which might already be using its own request parameters.
 
 Informal, tentative specification for HTTP Query headers
 ===========================================
@@ -56,26 +73,69 @@ in the node set). This is necessary since attribute selectors are used
 in CSS to target elements rather than attributes.
 * **text()** - Grab the text nodes within the node set
 
+Comparison with OData
+==================
+
+HTTP Query is a much lighter protocol. HTTP Query does hope to eventually support modification as does OData, but in a friendly, hierarchical manner such as with https://github.com/kriszyp/put-selector.
+
+(INCOMPLETE)
+
 Ideas for possible future todos
 ========================
 
-1. While the first goal is to allow regular website content creators to have their content available to searches--with HTML/XML being the inevitable document-centric format, JSON support (via JSONPath / RQL?) is also envisaged.
-1. It is also hoped, whether through minor markup changes to schema attachment, intelligent widgets may become more of a norm in exposing sophisticated, offlineable, type-aware and paginated widgets which do not depend on the content creator being themselves a developer for this functionality to be made available to users.
-1. Ajax site-independent web application, including ability to supply arbitrary URLs with cross-site headers or making AsYouWish requests (would be facilitated by https://bugzilla.mozilla.org/show_bug.cgi?id=880908 ; see also https://bugzilla.mozilla.org/show_bug.cgi?id=855936 )
-* Do demo code for HTML tables, HTML Microdata, TEI (XML)
+1. Add an Ajax site-independent web application, including ability to supply arbitrary URLs with cross-site headers or making AsYouWish requests (would be facilitated by https://bugzilla.mozilla.org/show_bug.cgi?id=880908 ; see also https://bugzilla.mozilla.org/show_bug.cgi?id=855936 )
+    * Do demos against HTML tables, HTML Microdata, TEI (XML)
 1. Server todos:
-* Make the Node.js implementation wrappable for use with other existing dynamic code.
-* Get XPath to work with HTML DOM and get CSS Selectors to work with XML (if it cannot already)?); test on (Linux) environment with jsdom
-* Fix local xpath query "//a/text()" or "//a/@href" (ORDERED_NODE_SNAPSHOT_TYPE === 7 is ok with arrays but not these apparently)
-* Find out why CSS b:attr(a) ($('b').attr('a')) is not working with cheerio though ok with b:nth-child(2):attr(a)
-* Allow CSS3 :text() nodes to be returned as an array of nodes for JSON (local and remote); allow explicit :html() ?
-* Implement a PHP-based server (use output buffering to allow working with other existing dynamic code) with equivalent functionality
-* Get server to resolve new HTML Includes (and entities?) server-side before performing queries
-* Support by cross-domain access by default (since presence of headers already implies at least some flexibility in querying)?
+    * Implement a PHP-based server (use output buffering to allow working with other existing dynamic code) with equivalent functionality
+    * Make the Node.js implementation wrappable for use with other existing dynamic code.
+    * Get XPath to work with HTML DOM and get CSS Selectors to work with XML (if it cannot already)?); test on (Linux) environment with jsdom
+    * Fix local xpath query "//a/text()" or "//a/@href" (ORDERED_NODE_SNAPSHOT_TYPE === 7 is ok with arrays but not these apparently)
+    * Find out why CSS b:attr(a) ($('b').attr('a')) is not working with cheerio though ok with b:nth-child(2):attr(a)
+    * Allow CSS3 :text() nodes to be returned as an array of nodes for JSON (local and remote); allow explicit :html() ?
+    * Get server to resolve new HTML Includes (or XInclude's) (and entities?) server-side before performing queries
+    * Support by cross-domain access by default (since presence of headers already implies at least some flexibility in querying)?
+    * Ability to send Relative XPaths (or CSS Sel.), so if file really big, can start at a certain point
+    * Store user access in simple text file and use to check along with BrowserID (not related to protocol but another "powerful-by-default" feature)
 1. Add-on todos:
-* Allow JSON format to be displayed as actual application/json content-type
-* Confirm why queries aren't working for some sites? (e.g., Yahoo and StackOverflow are detecting automatic Ajax header?)
-* Page-specific preferences on whether to send appropriate headers to load HTTPQuery-supporting sites as empty (or full) by default (instead of possible Ajax pagination by the server); selectively advertise support headers (or at least minimize types on which the "http-on-modify-request" header is sent)?
-1. Implement a file search protocol to search all files in a folder, etc. (On the desktop, see an analogous proposal for Firefox desktop search, at https://bugzilla.mozilla.org/show_bug.cgi?id=878626 . Implement via Gopher (or METS)-like protocol?
-
-(UNFINISHED)
+    * Confirm why queries aren't working for some sites and respond accordingly? (e.g., Yahoo and StackOverflow are detecting automatic Ajax header?)
+    * Allow JSON format to be displayed as actual application/json content-type
+    * Query input
+        * XPath (or CSS Sel.) syntax coloring? (also update regex coloring for CodeMirror!)
+        * XPath (or CSS Sel.) with auto-complete based on header-associated schema (including for HTML-treated-as-XML?) or at least general awareness of language/content-type (HTML/XML)
+    * Page-specific preferences on whether to send appropriate headers to load HTTPQuery-supporting sites as empty (or full) by default (instead of possible Ajax pagination by the server); selectively advertise support headers (or at least minimize types on which the "http-on-modify-request" header is sent)?
+1. Protocol enhancements
+    * JSON support (via JSONPath / RQL?)
+    * Schema attachment/markup enhancements for intelligent, type-aware, paginated, offlineable widgets:
+        * Schema attachment (or markup) used by browser (or server) to make suitable query interface
+            * Server indicates header-specified RelaxNG, Schematron for starters, and browser delivers simultaneously with content if possible
+            * Schema-awareness by browser to transform current document into queryable doc could work even if doc only partly loaded (or offline)
+            * Types:
+                1. Tables
+                    * Browser displays the requested data inline with already-loaded data, or as requested by user (for file download, separate dialog, etc.?)
+                    * Allow mashable plugins, e.g., for user providing their own Excel-like automated columns (e.g., if user wanted all tables to allow a given column's data to be translated word-for-word and added as a new column)
+                1. Lists
+                    * Hierarchical drill-down for browsing and search; also as requested by user (for file download, separate dialog, etc.?)
+                1. Arbitrary but type-aware queries (e.g., use a date selector for finding all dates within a range (of any element or a given element anywhere in the document)
+            * Allow both browser-side and server-side overlays (strip at least some markup server-side if handling server-side so client doesn't try to redo); might use headers to detect whether to let user use their own browser-supplied one or some Ajax-based, simulating widget; use Custom Elements?
+            * Web-based IDE (WIDE) to integrate with CKEditor/CodeMirror allowing inline querying and modification of data for a given large document without needing to load it all into the IDE view unless desired. Schema-driven input could also facilitate more common use of schemas with the query protocol (e.g., the schema for RelaxNG or Schematron could provide auto-complete or XSL on a schema could build a form for input).
+                * WYSIWYG table editor to allow adding of types (as well as max, starting point, etc.), so average users can create databases (and schematic info) easily in HTML
+            * Some kind of auto-update mechanism for offline storage? (OData ideas?)
+            * Limits
+                * Client-side size limits - e.g., normally download full load for offline caching (a particular site?) unless over 200 MB/table, etc.
+                * Server indicates support limitations (e. g., size limits, max rows/request (page) for tables, lists, etc.) and server ignores if user disregards
+                    * Allow server (or browser?) to read header or markup provided XPointers to find only specific elements supporting querying/pagination, etc. and with their limits
+                    * Possible default behaviors: avoid resolving includes?, default row count/size per server, or page-specified suggestions for partial loading and query points)
+                    * If the HTML is already database-generated, the server could use its own default number of rows/records/size
+            * Offline
+                * Coordinate full (or even partial) delivery for offline caching and querying (with automatic detection of offline mode, but also option to query offline even if online)
+                * Ensure offline storage works with data added after (and before) page load
+                * Add-on to allow any page stored for offline use (and cached in user-selected collections); ensure one can also store results when making selective queries
+    * (XQuery/XSL/XProc or) jQuery-like syntax for more developer or user-driven complex, server-side reshaping (along with XPath/CSS Selectors) including mashups, though this presents even more challenges re: security
+        * Include ability to include & mix other sources declaratively yet query together - e.g., protocol to send current doc to XSL as param to show automated cols
+    * Allow data modification, e.g., something friendly like https://github.com/kriszyp/put-selector
+    * Create corresponding bookmarkable/shareable protocol (e.g., `query:`) to request and reshape foreign sites with user permission
+        * Integrate into privileged AsYouWish HTML pages
+        * Add jQuery-like syntax option into add-on dialog with option to save as ayw-HTML (or create HTML content-type based on JS alone without <script></script>) (and then do for my own JML HTML-as-JSON content-type)
+    * Other related protocols
+        * Implement a related file search protocol to search all files in a folder, etc. (On the desktop, see an analogous proposal for Firefox desktop search, at https://bugzilla.mozilla.org/show_bug.cgi?id=878626 . Implement via Gopher (or METS)-like protocol? Check for <link/> to advertise support and thereby show interface?
+        * Consider headers/protocols where you can get just what you want (e.g., Gopher, XMPP Data Forms), but with option for author to surround with arbitrary HTML
