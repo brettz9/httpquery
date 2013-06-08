@@ -18,7 +18,8 @@ Static HTML/XML files can be read from the desktop before
 being transformed by the client-submitted XPath
 or CSS Selectors query. (A PHP demo is also planned.)
 
-==INTRODUCTION (IMPORTANT)==
+INTRODUCTION (IMPORTANT)
+=========================
 
 Note that as mentioned the protocol syntax as well as tools are still
 very much experimental and are used at your own risk.
