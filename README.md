@@ -129,6 +129,8 @@ Ideas for possible future todos
     * Support by cross-domain access by default (since presence of headers already implies at least some flexibility in querying)?
     * Ability to send Relative XPaths (or CSS Sel.), so if file really big, can start at a certain point
     * Store user access in simple text file and use to check along with BrowserID (not related to protocol but another "powerful-by-default" feature)
+    * Tool to auto-generate XML schema for SQL database table along with a single raw `<table>` export URL (but only enabling downloading
+    within limits (see limits below); XPath/CSS Selectors (or paginating query mechanism, etc.) can then be translated back into equivalent SQL.
 1. Add-on todos:
     * Confirm why queries aren't working for some sites and respond accordingly? (e.g., Yahoo and StackOverflow are detecting automatic Ajax header?)
     * Allow JSON format to be displayed as actual application/json content-type (and XML as application/xml)
