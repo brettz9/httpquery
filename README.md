@@ -150,6 +150,9 @@ Ideas for possible future todos
                     * Allow mashable plugins, e.g., for user providing their own Excel-like automated columns (e.g., if user wanted all tables to allow a given column's data to be translated word-for-word and added as a new column)
                 1. Lists
                     * Hierarchical drill-down for browsing and search; also as requested by user (for file download, separate dialog, etc.?)
+                1. Numbered paragraphs
+                    * Detect paragraph elements within a file and auto-number them (or use an attribute)--e.g., TEI's `<p n="">` for an automatic
+                    paragraph range selection interface
                 1. Arbitrary but type-aware queries (e.g., use a date selector for finding all dates within a range (of any element or a given element anywhere in the document)
             * Allow both browser-side and server-side overlays (strip at least some markup server-side if handling server-side so client doesn't try to redo); might use headers to detect whether to let user use their own browser-supplied one or some Ajax-based, simulating widget; use Custom Elements?
             * Web-based IDE (WIDE) to integrate with CKEditor/CodeMirror allowing inline querying and modification of data for a given large document without needing to load it all into the IDE view unless desired. Schema-driven input could also facilitate more common use of schemas with the query protocol (e.g., the schema for RelaxNG or Schematron could provide auto-complete or XSL on a schema could build a form for input).
