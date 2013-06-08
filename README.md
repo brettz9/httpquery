@@ -22,7 +22,9 @@ INTRODUCTION (IMPORTANT)
 =========================
 
 Note that as mentioned the protocol syntax as well as tools are still
-very much experimental and are used at your own risk.
+very much experimental and are used at your own risk. Allowing
+arbitrary XPath or CSS Selector syntax may present some
+increased risk of DDOS attacks.
 
 While others have pioneered work in this direction (e.g., OData),
 it is hoped that this simple protocol will gain support and allow
@@ -54,10 +56,26 @@ in the node set). This is necessary since attribute selectors are used
 in CSS to target elements rather than attributes.
 * **text()** - Grab the text nodes within the node set
 
-Possible future todos
-=================
+Ideas for possible future todos
+========================
 
 1. While the first goal is to allow regular website content creators to have their content available to searches--with HTML/XML being the inevitable document-centric format, JSON support (via JSONPath / RQL?) is also envisaged.
-2. It is also hoped, whether through minor markup changes to schema attachment, intelligent widgets may become more of a norm in exposing sophisticated, offlineable, type-aware and paginated widgets which do not depend on the content creator being themselves a developer for this functionality to be made available to users.
+1. It is also hoped, whether through minor markup changes to schema attachment, intelligent widgets may become more of a norm in exposing sophisticated, offlineable, type-aware and paginated widgets which do not depend on the content creator being themselves a developer for this functionality to be made available to users.
+1. Ajax site-independent web application, including ability to supply arbitrary URLs with cross-site headers or making AsYouWish requests (would be facilitated by https://bugzilla.mozilla.org/show_bug.cgi?id=880908 ; see also https://bugzilla.mozilla.org/show_bug.cgi?id=855936 )
+* Do demo code for HTML tables, HTML Microdata, TEI (XML)
+1. Server todos:
+* Make the Node.js implementation wrappable for use with other existing dynamic code.
+* Get XPath to work with HTML DOM and get CSS Selectors to work with XML (if it cannot already)?); test on (Linux) environment with jsdom
+* Fix local xpath query "//a/text()" or "//a/@href" (ORDERED_NODE_SNAPSHOT_TYPE === 7 is ok with arrays but not these apparently)
+* Find out why CSS b:attr(a) ($('b').attr('a')) is not working with cheerio though ok with b:nth-child(2):attr(a)
+* Allow CSS3 :text() nodes to be returned as an array of nodes for JSON (local and remote); allow explicit :html() ?
+* Implement a PHP-based server (use output buffering to allow working with other existing dynamic code) with equivalent functionality
+* Get server to resolve new HTML Includes (and entities?) server-side before performing queries
+* Support by cross-domain access by default (since presence of headers already implies at least some flexibility in querying)?
+1. Add-on todos:
+* Allow JSON format to be displayed as actual application/json content-type
+* Confirm why queries aren't working for some sites? (e.g., Yahoo and StackOverflow are detecting automatic Ajax header?)
+* Page-specific preferences on whether to send appropriate headers to load HTTPQuery-supporting sites as empty (or full) by default (instead of possible Ajax pagination by the server); selectively advertise support headers (or at least minimize types on which the "http-on-modify-request" header is sent)?
+1. Implement a file search protocol to search all files in a folder, etc. (On the desktop, see an analogous proposal for Firefox desktop search, at https://bugzilla.mozilla.org/show_bug.cgi?id=878626 . Implement via Gopher (or METS)-like protocol?
 
 (UNFINISHED)
