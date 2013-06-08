@@ -16,23 +16,42 @@ be made to obtain subsets of HTML or XML data via XPath or CSS selector
 syntax (currently XPath is for XML/XHTML only; CSS Selectors for HTML only?).
 Static HTML/XML files can be read from the desktop before
 being transformed by the client-submitted XPath
-or CSS Selectors query. (A PHP demo is also planned.)
+or CSS Selectors query. Files with extension "html", "xhtml", "xml",
+or "tei" are currently recognized (files placed within the "Node"
+subfolder).
+
+A PHP demo server is also planned.
 
 INTRODUCTION (IMPORTANT)
 =========================
 
-Note that as mentioned the protocol syntax as well as tools are still
+Despite the fact that the ubiquitous files of the web, HTML files, are
+THEMSELVES databases, there has been a curious lack of ability
+to query these files without first needing to enter their contents into
+a database or for a consumer to be forced to download the entire
+file and then obtain the subset they desire. Even when
+time has been taken to enter file contents into a database, users
+are often hamstrung by developer decisions, as they are not usually
+empowered to run arbitrary queries.
+
+This HTTP Query protocol, with reference Node.js and Firefox client
+implementation are meant to provide users with a means to overcome
+these barriers and limitations.
+
+Other possible uses may include selective spidering.
+
+**Note that as mentioned the protocol syntax as well as tools are still
 very much experimental and are used at your own risk. Allowing
 arbitrary XPath or CSS Selector syntax may present some
-increased risk of DDOS attacks.
+increased risk of DDOS attacks.**
 
-While others have pioneered work in this direction (e.g., OData),
-it is hoped that this simple protocol will gain support and allow
-piecemeal selection of content in a manner reusable by servers
-and clients with an absolutely bare minimum of effort by content
-creators. The Web IS a database, and it is about time that
+The Web IS a database, and it is about time that
 its data becomes opened--for the humblest content creator
 to experienced mashup developers.
+
+
+Future goals (general)
+=================
 
 While the first goal is to allow regular website content creators to
 have their content available to searches--with HTML/XML being
@@ -45,13 +64,17 @@ sophisticated, offlineable, type-aware and paginated widgets which do
 not depend on the content creator being themselves a developer for
 this functionality to be made available to users.
 
-Other possible uses may include selective spidering.
-
 See the todos for more future goals for the project.
 
 FAQ
 ====
-* Why require headers rather than GET-friendly bookmarkable/shareable request parameters?* - I wanted the protocol to be able to overlay any dynamic as well as static system which might already be using its own request parameters.
+* *Why require headers rather than GET-friendly bookmarkable/shareable request parameters?* - I wanted the protocol to be able to overlay any dynamic as well as static system which might already be using its own request parameters.
+
+* *If I generate my data dynamically (e.g., because I have files too large to be efficiently queried against a static file), how is the protocol still useful?* - The query mechanism and API will still be reusable by local apps (or remote ones such as the Firefox add-on if the server is enabled in a manner like the included Node server), code libraries, etc., even if you do not wish to restrict yourself to static files. For example, even though your API might filter the raw data as it is, an HTTPQuery could be allowed to run on top of that filtered data.
+
+* *Why not use OData?* - While OData has pioneered work in this direction, it is hoped that this simple protocol will gain support and allow
+piecemeal selection of content in a manner reusable by servers and clients with an absolutely bare minimum of effort by content
+creators (and even implementers).
 
 Informal, tentative specification for HTTP Query headers
 ===========================================
