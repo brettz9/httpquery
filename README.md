@@ -78,7 +78,7 @@ See the todos for more future goals for the project.
 
 FAQ
 ====
-* *Why require headers rather than GET-friendly bookmarkable/shareable request parameters?* - I wanted the protocol to be able to overlay any dynamic as well as static system which might already be using its own request parameters.
+* *Why require headers rather than GET-friendly bookmarkable/shareable request parameters?* - I wanted the protocol to be able to overlay any dynamic as well as static system which might already be using its own request parameters. However, I would like to see a non-HTTP web protocol be created to work with these headers.
 
 * *If I generate my data dynamically (e.g., because I have files too large to be efficiently queried against a static file), how is the protocol still useful?* - The query mechanism and API will still be reusable by local apps (or remote ones such as the Firefox add-on if the server is enabled in a manner like the included Node server), code libraries, etc., even if you do not wish to restrict yourself to static files. For example, even though your API might filter the raw data as it is, an HTTPQuery could be allowed to run on top of that filtered data.
 
