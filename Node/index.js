@@ -63,7 +63,7 @@ http.createServer(function (req, res) {
             return exitError(res, responseHeaders, err);
         }
         var doc, xpath1Request, queryResult, $, css3RequestFull, css3Request, type, css3Attr,
-            nodeArrayToHTMLArray = function (arr) {
+            nodeArrayToSerializedArray = function (arr) {
                 return arr.map(function (node) {
                     return node.toString();
                 });
@@ -79,7 +79,7 @@ http.createServer(function (req, res) {
             doc = new Dom().parseFromString(String(fileContents));
             xpath1Request = req.headers['query-request-xpath1'] && req.headers['query-request-xpath1'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
             queryResult = xpath.select(xpath1Request, doc);
-            queryResult = isJSON ? nodeArrayToHTMLArray(queryResult) : wrapFragment(nodeArrayToHTMLArray(queryResult).join(''));
+            queryResult = isJSON ? nodeArrayToSerializedArray(queryResult) : wrapFragment(nodeArrayToSerializedArray(queryResult).join(''));
         }
         else if (/*clientCSS3Support &&*/ req.headers['query-request-css3'] && !req.headers['query-full-request']) {
             // Support our own custom :text() and :attr(...) pseudo-classes (todo: do as (two-colon) pseudo-elements instead)
@@ -89,7 +89,7 @@ http.createServer(function (req, res) {
             type = css3RequestFull[2] || (isJSON ? 'toArray' : 'toString');
             css3Attr = css3RequestFull[3];
 
-            nodeArrayToHTMLArray = function (items) {
+            nodeArrayToSerializedArray = function (items) {
                 /*return arr.map(function (node) {
                     return node; //.html();
                 });*/
@@ -104,7 +104,7 @@ http.createServer(function (req, res) {
                     break;
                 case 'toArray':
                     queryResult = $(css3Request); // Don't merge with next line as intermediate queryResult may be needed
-                    queryResult = wrapFragment(nodeArrayToHTMLArray(queryResult)); // $(css3Request).toString(); handles merging
+                    queryResult = wrapFragment(nodeArrayToSerializedArray(queryResult)); // $(css3Request).toString(); handles merging
                     break;
                 // Todo: Change 'text' to return array of text nodes in case of JSON?
                 case 'text': case 'toString':
