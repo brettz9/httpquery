@@ -116,6 +116,9 @@ http.createServer(function (req, res) {
                     break;
             }
         }
+        else {
+            queryResult = fileContents;
+        }
 
         fileContents = isJSON ? JSON.stringify(queryResult) : queryResult;
         
