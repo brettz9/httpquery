@@ -116,6 +116,7 @@ HTTP Query is a much lighter protocol. HTTP Query does hope to eventually suppor
 Ideas for possible future todos
 ========================
 
+1. Add tests (especially ensuring content-type works properly with each mode)
 1. Add an Ajax site-independent web application, including ability to supply arbitrary URLs with cross-site headers or making AsYouWish requests (would be facilitated by https://bugzilla.mozilla.org/show_bug.cgi?id=880908 ; see also https://bugzilla.mozilla.org/show_bug.cgi?id=855936 )
     * Do demos against HTML tables, HTML Microdata, TEI (XML)
 1. Server todos:
@@ -123,7 +124,6 @@ Ideas for possible future todos
     * Make the Node.js implementation wrappable for use with other existing dynamic code.
     * Get XPath to work with HTML DOM and get CSS Selectors to work with XML (if it cannot already)?); test on (Linux) environment with jsdom
     * Fix local xpath query "//a/text()" or "//a/@href" (ORDERED_NODE_SNAPSHOT_TYPE === 7 is ok with arrays but not these apparently)
-    * Find out why CSS b:attr(a) ($('b').attr('a')) is not working with cheerio though ok with b:nth-child(2):attr(a)
     * Allow CSS3 :text() nodes to be returned as an array of nodes for JSON (local and remote); allow explicit :html() ?
     * Get server to resolve new HTML Includes (or XInclude's) (and entities?) server-side before performing queries
     * Support by cross-domain access by default (since presence of headers already implies at least some flexibility in querying)?
