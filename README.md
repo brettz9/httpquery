@@ -15,14 +15,14 @@ HTTPQuery is an *experimental* protocol with the following tools:
 * Proof-of-concept **Firefox addon** (web app to
 come) to allow remote HTTPQueries without access
 restrictions
-* **Node.js server file handler implementation** to allow remote queries to
+* **Node.js and PHP server file handler implementations** to allow remote queries to
 be made to obtain subsets of HTML or XML data via XPath or CSS selector
 syntax (currently XPath is for XML/XHTML only; CSS Selectors for HTML only?).
 Static HTML/XML files can be read from the desktop before
 being transformed by the client-submitted XPath
 or CSS Selectors query. Files with extension "html", "xhtml", "xml",
-or "tei" are currently recognized (files placed within the "Node"
-subfolder).
+or "tei" are currently recognized (files placed within the respective
+server subfolder ("Node" or "PHP")). Please see their respective README's.
 
 A PHP demo server is also planned.
 
@@ -120,8 +120,9 @@ Ideas for possible future todos
 1. Add an Ajax site-independent web application, including ability to supply arbitrary URLs with cross-site headers or making AsYouWish requests (would be facilitated by https://bugzilla.mozilla.org/show_bug.cgi?id=880908 ; see also https://bugzilla.mozilla.org/show_bug.cgi?id=855936 )
     * Do demos against HTML tables, HTML Microdata, TEI (XML)
 1. Server todos:
-    * Implement a PHP-based server (use output buffering to allow working with other existing dynamic code) with equivalent functionality
     * Make the Node.js implementation wrappable for use with other existing dynamic code.
+    * Make the PHP implementation more easily wrappable for use with dynamic code.
+    * Contemplate what error/code to return (instead of full text) if user submits query header but not supported
     * Get XPath to work with HTML DOM and get CSS Selectors to work with XML (if it cannot already)?); test on (Linux) environment with jsdom
     * Fix local xpath query "//a/text()" or "//a/@href" (ORDERED_NODE_SNAPSHOT_TYPE === 7 is ok with arrays but not these apparently)
     * Allow CSS3 :text() nodes to be returned as an array of nodes for JSON (local and remote); allow explicit :html() ?
