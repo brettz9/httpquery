@@ -46,7 +46,7 @@ var modifyRequest,
         var checkCacheListener = {
             onCacheEntryAvailable: function (entry, access, status) {
                 if (!entry) { // Called if not available
-                    return noEntryCb && noEntryCb();
+                    return noEntryCb && noEntryCb(queryType);
                 }
                 var queryServerSupport = checkQueryServerSupport(entry.getMetaDataElement('response-head'), queryType);
                 if (queryServerSupport) {
