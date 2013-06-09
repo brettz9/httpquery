@@ -104,12 +104,15 @@ http.createServer(function (req, res) {
                     queryResult = $(css3Request).attr(css3Attr);
                     break;
                 case 'toArray':
-                    queryResult = $(css3Request); // Don't merge with next line as intermediate queryResult may be needed
-                    queryResult = wrapFragment(nodeArrayToSerializedArray(queryResult)); // $(css3Request).toString(); handles merging
+                    queryResult = nodeArrayToSerializedArray($(css3Request)); // $(css3Request).toString(); handles merging
                     break;
                 // Todo: Change 'text' to return array of text nodes in case of JSON?
-                case 'text': case 'toString':
+                case 'text':
                     queryResult = $(css3Request)[type]();
+                    break;
+                case 'toString':
+                    queryResult = $(css3Request); // Don't merge with next line as intermediate queryResult may be needed by wrapFragment
+                    queryResult = wrapFragment(nodeArrayToSerializedArray(queryResult).join('')); // $(css3Request).toString(); handles merging
                     break;
             }
         }

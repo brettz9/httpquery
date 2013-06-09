@@ -1,0 +1,6 @@
+<div xmlns="http://www.w3.org/1999/xhtml">
+<b>Hello</b>
+<b a="x">my</b>
+<i>dear</i>
+<b a="y">World</b>
+</div>
