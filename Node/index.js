@@ -5,6 +5,7 @@
 
 'use strict';
 var debug = 1,
+    ignoreQuerySupport = true,
     http = require('http'),
     fs = require('fs'),
     cheerio = require('cheerio'), // https://github.com/MatthewMueller/cheerio
@@ -75,13 +76,13 @@ http.createServer(function (req, res) {
                 var tag = 'div xmlns="http://www.w3.org/1999/xhtml"';
                 return '<' + tag + '>' + frag + '</' + tag.match(/^\w*/)[0] + '>';
             };
-        if (/*clientXPath1Support &&*/ req.headers['query-request-xpath1'] && !req.headers['query-full-request']) {
+        if ((ignoreQuerySupport || clientXPath1Support) && req.headers['query-request-xpath1'] && !req.headers['query-full-request']) {
             doc = new Dom().parseFromString(String(fileContents));
             xpath1Request = req.headers['query-request-xpath1'] && req.headers['query-request-xpath1'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
             queryResult = xpath.select(xpath1Request, doc);
             queryResult = isJSON ? nodeArrayToSerializedArray(queryResult) : wrapFragment(nodeArrayToSerializedArray(queryResult).join(''));
         }
-        else if (/*clientCSS3Support &&*/ req.headers['query-request-css3'] && !req.headers['query-full-request']) {
+        else if ((ignoreQuerySupport || clientCSS3Support) && req.headers['query-request-css3'] && !req.headers['query-full-request']) {
             // Support our own custom :text() and :attr(...) pseudo-classes (todo: do as (two-colon) pseudo-elements instead)
             $ = cheerio.load(String(fileContents));
             css3RequestFull = req.headers['query-request-css3'] && req.headers['query-request-css3'].trim().match(/(.*?)(?:\:(text|attr)\(([^\)]*)\))?$/); // Allow explicit "html" (toString) or "toArray" (or "json")?
