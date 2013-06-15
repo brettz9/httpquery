@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>HTTP Query Demo</title>
+    <script src="ff-sdk-content-script-shim.js"></script>
+    <script src="httpquery-js-demo.js"></script>
+    <script>
+        
+    </script>
+</head>
+<body>
+
+<h1>HTTP Query Demo</h1>
+
+    <form id="queryForm">
+        <input type="url" id="queryURL" size="100" placeholder="http://example.com" /><br />
+        <label>XPath: <input type="text" id="xpath1" placeholder="//table" size="80" /></label><br />
+        <label>CSS3 Selectors: <input type="text" id="css3" placeholder="table > tr" size="80" /></label><br />
+        <label>Output:
+            <label><input type="radio" name="format" value="html" checked="checked" />HTML/XML</label>
+            <label><input type="radio" name="format" value="xml" />XML (to convert HTML to XHTML)</label>
+            <label><input type="radio" name="format" value="json" />JSON</label>
+        </label><br />
+        <input type="submit" value="Submit" />
+    </form>
+    <textarea id="results" cols="40" rows="5"></textarea>
+
+</body>
+</html>
