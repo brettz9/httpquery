@@ -15,7 +15,7 @@ var http = require('./httpquery'); // Todo: Make into regular module here
 (function () {
 'use strict';
 
-var http = require('../httpquery').staticFiles;
+var http = require('../httpquery')('static');
 
 http.createServer().listen(1337, '127.0.0.1');
 console.log('Static server running at http://127.0.0.1:1337/');

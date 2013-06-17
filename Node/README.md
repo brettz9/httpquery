@@ -5,6 +5,7 @@ are already a part of the repository): xpath, cheerio, and xmldom:
     npm install cheerio
     npm install xpath
     npm install xmldom
+    npm install es6-collections
 
 These dependencies may change at a later date.
 

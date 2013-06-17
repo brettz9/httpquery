@@ -1,35 +1,62 @@
 /*globals module, require */
+
 /*
-@todo Handle favicons for default behavior
-@todo Make this integratable into a pipeline
-@todo ensure can use HTML or XML DOM with content-type accordingly
-@todo Use JSDOM or http://zombie.labnotes.org/ (non-Windows?)?
+In order to allow customization by the user depending on a
+specific request or response (rather than just initialization
+performed by the constructor), we could let the user:
+1. Add properties/methods to the request/response objects
+directly and read them from the middleware, but this could
+run into namespace problems.
+2. Change the middleware approach to allow passing on of
+an additional argument (or add to the "next" function?) but
+besides possibly running into namespacing problems with
+other middleware that supported this, it would be limited to
+those which did support it. (?)
+3. Extend the htteepee "createServer" method to allow extra
+arguments containing functions we could invoke (passing it
+them request/responses). This might fit with "https" pattern allowing
+an options first argument (though again, namespacing could
+become an issue).
+
+For now, we will try to allow setting of defaults, and at most
+detect a changing of req.url and headers by the user.
 */
 
-module.exports = function (txt) {
+/*
+@todo Handle favicons for default behavior
+@todo ensure can use HTML or XML DOM with content-type accordingly
+@todo Use JSDOM or http://zombie.labnotes.org/ (non-Windows?)?
+@todo Any way to avoid need for next() calls from middleware (does it
+allow async use or something?)
+*/
+
+module.exports = function (options) {
     'use strict';
 
-    var fs = require('fs'),
+    var  
+        // REQUIRES
+        WeakMap = require('es6-collections'),        
+        fs = require('fs'),
+        path = require('path'),
         cheerio = require('cheerio'), // https://github.com/MatthewMueller/cheerio
         xpath = require('xpath'), // https://npmjs.org/package/xpath (npm install xpath)
-        Dom = require('xmldom').DOMParser; // https://npmjs.org/package/xmldom (npm install xmldom)
+        Dom = require('xmldom').DOMParser, // https://npmjs.org/package/xmldom (npm install xmldom)
+        
+        // OPTIONS
+        debug = options.debug || false,
+        ignoreQuerySupport = options.ignoreQuerySupport === undefined || options.ignoreQuerySupport, // i.e., default is true
+
+        // STATIC VARIABLES (though used to hold instances)
+        bufferMap = new WeakMap();
+        // = new WeakMap(),
 
     /**
     * @private
     * @constant
     */
-    /**
-    * @private
-    * @constant
-    */
-    function write (res, code, responseHeaders, fileContents) {
-        res.writeHead(code, responseHeaders);
+    function end (res, code, fileContents) {
+        res.statusCode = code;
         res.end(fileContents); //  + '\n'
-    }
-
-    function exitError (res, $h, err) {
-        var errorMessage = $h.debug ? err : 'ERROR';
-        write(res, 404, $h.responseHeaders, '<div style="color:red;font-weight:bold">' + errorMessage + '</div>');
     }
 
     /**
@@ -43,10 +70,43 @@ module.exports = function (txt) {
     }
 
 
-    function performQuery (fileContents, req, res, $h) {
+    /**
+    * Due to the need for a Content-Type header, this function must be called
+    *  after setContentTypeByFileExtension (or after setting Content-Type elsewhere); auto-detect option?
+    * @private
+    * @constant
+    * @returns {Boolean} Whether or not the current headers recognize the content to be sent as JSON
+    */
+    function detectAndSetJSONHeaders (req, res) {
+        var isJSON,
+            contentType = res.getHeader('Content-Type');
         
-        fileContents = String(fileContents); // Necessary?
+        if (!contentType) {
+            throw 'detectAndSetJSONHeaders() must be invoked after a Content-Type header is set, as through setContentTypeByFileExtension()';
+        }
+        isJSON = req.headers['query-format'] === 'json';
+        if (isJSON) {
+            res.setHeader('query-content-type', contentType);
+            res.setHeader('Content-Type', 'application/json');
+        }
+        return isJSON;
+    }
+
+    
+    /**
+    * @private
+    */
+    function exitError (res, err) {
+        var errorMessage = debug ? err : 'ERROR';
+        end(res, 404, '<div style="color:red;font-weight:bold">' + errorMessage + '</div>');
+    }
+
+    function performQuery (req, res) {
         var doc, xpath1Request, queryResult, $, css3RequestFull, css3Request, queryType, css3Attr,
+            fileContents = String(bufferMap.get(res, '')), // String() Necessary?
+            clientXPath1Support = clientSupportCheck(req, 'xpath1'),
+            clientCSS3Support = clientSupportCheck(req, 'css3'),
+            isJSON = detectAndSetJSONHeaders(req, res),
             reqHeaders = req.headers,
             nodeArrayToSerializedArray = function (arr) {
                 return arr.map(function (node) {
@@ -54,25 +114,26 @@ module.exports = function (txt) {
                 });
             },
             wrapFragment = function (frag) {
-                if ($h.isHTML) { // || queryResult.length <= 1) { // No need to wrap for HTML or single result sets as no well-formedness requirements
+                var tag, isHTML = res.getHeader('Content-Type') === 'text/html';
+                if (isHTML) { // || queryResult.length <= 1) { // No need to wrap for HTML or single result sets as no well-formedness requirements
                     return frag;
                 }
-                var tag = 'div xmlns="http://www.w3.org/1999/xhtml"';
+                tag = 'div xmlns="http://www.w3.org/1999/xhtml"';
                 return '<' + tag + '>' + frag + '</' + tag.match(/^\w*/)[0] + '>';
             };
 
-        if (($h.ignoreQuerySupport || $h.clientXPath1Support) && reqHeaders['query-request-xpath1'] && !reqHeaders['query-full-request']) {
+        if ((ignoreQuerySupport || clientXPath1Support) && reqHeaders['query-request-xpath1'] && !reqHeaders['query-full-request']) {
             doc = new Dom().parseFromString(fileContents);
             xpath1Request = reqHeaders['query-request-xpath1'] && reqHeaders['query-request-xpath1'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
             queryResult = xpath.select(xpath1Request, doc);
-            queryResult = $h.isJSON ? nodeArrayToSerializedArray(queryResult) : wrapFragment(nodeArrayToSerializedArray(queryResult).join(''));
+            queryResult = isJSON ? nodeArrayToSerializedArray(queryResult) : wrapFragment(nodeArrayToSerializedArray(queryResult).join(''));
         }
-        else if (($h.ignoreQuerySupport || $h.clientCSS3Support) && reqHeaders['query-request-css3'] && !reqHeaders['query-full-request']) {
+        else if ((ignoreQuerySupport || clientCSS3Support) && reqHeaders['query-request-css3'] && !reqHeaders['query-full-request']) {
             // Support our own custom :text() and :attr(...) pseudo-classes (todo: do as (two-colon) pseudo-elements instead)
             $ = cheerio.load(fileContents);
             css3RequestFull = reqHeaders['query-request-css3'] && reqHeaders['query-request-css3'].trim().match(/(.*?)(?:\:(text|attr)\(([^\)]*)\))?$/); // Allow explicit "html" (toString) or "toArray" (or "json")?
             css3Request = css3RequestFull[1];
-            queryType = css3RequestFull[2] || ($h.isJSON ? 'toArray' : 'toString');
+            queryType = css3RequestFull[2] || (isJSON ? 'toArray' : 'toString');
             css3Attr = css3RequestFull[3];
 
             nodeArrayToSerializedArray = function (items) {
@@ -105,107 +166,96 @@ module.exports = function (txt) {
             queryResult = fileContents;
         }
 
-        fileContents = $h.isJSON ? JSON.stringify(queryResult) : queryResult;
+        return fileContents = isJSON ? JSON.stringify(queryResult) : queryResult;
         
-        write(res, 200, $h.responseHeaders, fileContents);
+        end(res, 200, fileContents);
     }
 
-    function setURL ($h, url) {
-        $h.url = url;
-        $h.isXHTML = url.match(/\.xhtml/);
-        $h.isXML = url.match(/\.xml/);
-        $h.isTEI = url.match(/\.tei/);
-        $h.isHTML = !($h.isXHTML || $h.isXML || $h.isTEI);
-        $h.resultContentType = ($h.isXHTML ? 'application/xhtml+xml' :
-                                                $h.isXML ? 'application/xml' :
-                                                    $h.isTEI ? 'application/tei+xml' : 'text/html');
-    }
 
-    /**
-    * Due to the need for $h.resultContentType, this function must be called
-    *  after setURL (or after setting $h.resultContentType)
-    */
-    function detectHeaders ($h, req) {
-        if (!$h.resultContentType) {
-            throw 'detectHeaders() must be invoked after the resultContentType is set, as through setURL()';
-        }
-        $h.isJSON = req.headers['query-format'] === 'json';
-        $h.responseHeaders = {
-            'Content-Type': $h.isJSON ? 'application/json' : $h.resultContentType
-        };
-        if ($h.isJSON) {
-            $h.responseHeaders['query-content-type'] = $h.resultContentType;
-        }
-        $h.clientXPath1Support = clientSupportCheck(req, 'xpath1');
-        $h.clientCSS3Support = clientSupportCheck(req, 'css3');    
-    }
-
-    function readFile (req, res, url, $h) {
-        fs.readFile(url, function (err, fileContents) {
+    function readFile (req, res, path) {
+        fs.readFile(path, function (err, fileContents) {
             if (err) {
-                return exitError(res, $h, err);
+                return exitError(res, err);
             }
             
-            performQuery(fileContents, req, res, $h);
-            
+            // performQuery (continue middleware)
         });
     }
 
-    function handleRequestAndResponse (req, res, cb) {
-        // todo: Do some work here
-        var $h,
-            newReq = {
-                httpQuery: { // Namespace all of our custom methods and data
-                   // DEFAULTS
-                   ignoreQuerySupport: true,
-                   debug: 0,
-                   // API
-                    setURL: function (url) {
-                        setURL(newReq.httpQuery, url);
-                    },
-                    setStaticURL: function (url) {
-                        url = url.slice(1) || 'index.html'; // Cut off initial slash
-                        url = (url.slice(-1) === '/' ? url + 'index.html' : url).replace(/\?.*$/, '');
-                        // url = require('url').parse(url).pathname; // Need to strip off request parameters?
-                        this.setURL(url);
-                    },
-                    detectHeaders: function () {
-                        detectHeaders(newReq.httpQuery, req);
-                    },
-                    readFile: function (url) { // Todo: Allow a parameter at all?
-                        readFile(req, res, (url || $h.url), $h);
-                    }
-                }
-            },
-            // todo: Wrap http://nodejs.org/api/http.html#http_class_http_serverresponse (and http://nodejs.org/api/stream.html#stream_writable_stream )
-            newRes = {
-                end : function () {
-                    var reqHeaders = req.headers;
-                    if (reqHeaders['query-client-support'] && !reqHeaders['query-request-xpath1'] && !reqHeaders['query-request-css3'] && !reqHeaders['query-full-request']) {
-                        $h.responseHeaders['query-server-support'] = 'xpath1 css3';
-                        write(res, 200, $h.responseHeaders, ''); // Don't waste bandwidth if client supports protocol and hasn't asked us to deliver the full document
-                        // Todo: we should allow delivery of a default payload (e.g., full doc if not specified as requesting empty for feature detection+immediate execution if supported)
-                    }
-                    else {
-                        $h.responseHeaders['query-server-support'] = 'xpath1 css3';
-                    }
-                    
-                    if (!$h.url[0].match(/\w/) || $h.url.match(/\.\./)) {
-                        return exitError(res, $h, 'Disallowed character in file name');
-                    }
-                }
-            };
-        $h = newReq.httpQuery; // For convenience above
-       
-     
-        cb(newReq, newRes);
+    /**
+    * @todo Replace this approach with https://gist.github.com/brettz9/5790179 or https://github.com/mscdex/mmmagic (detect from file content)
+    */
+    function setContentTypeByFileExtension (file, res) {
+        $h.url = file;
+        var contentType,
+            extension = path.extname(file).replace(/^\./, '');
+
+        res.setHeader('Content-Type', {
+            xhtml: 'application/xhtml+xml',
+            xml: 'application/xml',
+            tei: 'application/tei+xml'
+        }[extension] || 'text/html');
+    }
+    
+    /**
+    * @private
+    * @constant
+    */
+    function addQueryRangeSupports (res) {
+        oldAcceptRanges = res.getHeader('Accept-Ranges');
+        acceptRanges = ['xpath1', 'css3'].concat(oldAcceptRanges || []).join(', ');
+        res.setHeader('Accept-Ranges', acceptRanges); // was query-server-support
     }
 
+    function handleRequestAndResponse (req, res) {
+        // todo: Do some work here
+        var acceptRanges, oldAcceptRanges,
+            reqHeaders = req.headers,
+            newReq = {
+                // API
+                setContentTypeByFileExtension: function (url) {
+                    setContentTypeByFileExtension(url, res);
+                },
+                setStaticURL: function (url) {
+        if (!$h.url[0].match(/\w/) || $h.url.match(/\.\./)) {
+            return exitError(res, 'Disallowed character in file name');
+        }
+                    var pth = path.normalize(require('url').parse(url).pathname);
+                    pth = (!pth || pth.slice(-1) === '/') ? pth + 'index.html' : pth;
+                    this.setContentTypeByFileExtension(pth);
+                },
+                readFile: function (url) { // Todo: Allow a parameter at all?
+                    readFile(req, res, (url || $h.url));
+                }
+            };
 
+        addQueryRangeSupports(res);
+        if (reqHeaders['query-client-support'] && !reqHeaders['query-request-xpath1'] && !reqHeaders['query-request-css3'] && !reqHeaders['query-full-request']) {
+            end(res, 200, ''); // Don't waste bandwidth if client supports protocol and hasn't asked us to deliver the full document
+            // Todo: we should allow delivery of a default payload (e.g., full doc if not specified as requesting empty for feature detection+immediate execution if supported)
+        }
+        return performQuery(req, res); // transformedContent
+    }
+
+    /**
+    * @param {IncomingMessage} req See {@link http://nodejs.org/api/http.html#http_http_incomingmessage}
+    * @param {ServerResponse} res See {@link http://nodejs.org/api/http.html#http_class_http_serverresponse} and {@link http://nodejs.org/api/stream.html#stream_class_stream_writable}
+    */
     return function (req, res, next) {
         var _end = res.end;
-        res.end = function (data) {
-            _end.call(res, txt + data);
+        
+        // Todo: Handle encoding argument on this method (use https://github.com/bnoordhuis/node-iconv or https://github.com/bnoordhuis/node-buffertools ?)
+        res.write = function (chunk, encoding) {
+            bufferMap.set(res, bufferMap.get(res, '') + chunk);
+        };
+        
+        res.end = function (data, encoding) {
+            this.write(data, encoding); // We'll leave it to _end() using the result of handleRequestAndResponse() to do the real writing
+            _end.call(
+                res,
+                handleRequestAndResponse(req, res)
+                // Todo: no encoding argument here to avoid double-decoding?
+            );
         };
         next();
     };

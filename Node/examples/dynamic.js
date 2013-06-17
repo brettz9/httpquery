@@ -16,7 +16,7 @@ var http = require('./httpquery'); // Todo: Make into regular module here
 'use strict';
 
 //var http = require('http');
-var http = require('../httpquery').dynamicFiles;
+var http = require('../httpquery')('dynamic');
 
 http.createServer(function (req, res) {
 
