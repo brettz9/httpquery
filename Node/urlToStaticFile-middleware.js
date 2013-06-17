@@ -1,5 +1,72 @@
-/*globals module */
+/*globals module, require */
 
+(function (options) {
+'use strict';
+
+var 
+    // REQUIRES
+    fs = require('fs'),
+    path = require('path'),
+    // DEFAULTS
+    debug = options.debug || false;
+
+/**
+* @private
+* @constant
+*/
+function end (res, code, fileContents) {
+    res.statusCode = code;
+    res.end(fileContents); //  + '\n'
+}
+
+/**
+* @private
+*/
+function exitError (res, err) {
+    var errorMessage = debug ? err : 'ERROR';
+    end(res, 404, '<div style="color:red;font-weight:bold">' + errorMessage + '</div>');
+}
+
+/**
+* @todo Replace this approach with https://gist.github.com/brettz9/5790179 or https://github.com/mscdex/mmmagic (detect from file content)
+*/
+function setContentTypeByFileExtension (file, res) {
+    $h.url = file;
+    var contentType,
+        extension = path.extname(file).replace(/^\./, '');
+
+    res.setHeader('Content-Type', {
+        xhtml: 'application/xhtml+xml',
+        xml: 'application/xml',
+        tei: 'application/tei+xml'
+    }[extension] || 'text/html');
+}
+
+function setStaticURL (res, url) {
+
+if (!$h.url[0].match(/\w/) || $h.url.match(/\.\./)) {
+    return exitError(res, 'Disallowed character in file name');
+}
+    var pth = path.normalize(require('url').parse(url).pathname);
+    pth = (!pth || pth.slice(-1) === '/') ? pth + 'index.html' : pth;
+    setContentTypeByFileExtension(pth);
+}
+
+function readFile (req, res, path) {
+    fs.readFile(path, function (err, fileContents) {
+        if (err) {
+            return exitError(res, err);
+        }
+        
+        // performQuery (continue middleware)
+    });
+}
+
+/*function readFile (url) { // Todo: Allow a parameter at all?
+    readFile(req, res, (url || $h.url));
+}*/
+
+}());
 
 // From https://gist.github.com/brettz9/5790179
 // adapted from https://gist.github.com/rrobe53/976610

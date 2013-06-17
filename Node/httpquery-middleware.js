@@ -36,14 +36,12 @@ module.exports = function (options) {
     var  
         // REQUIRES
         WeakMap = require('es6-collections'),        
-        fs = require('fs'),
-        path = require('path'),
         cheerio = require('cheerio'), // https://github.com/MatthewMueller/cheerio
         xpath = require('xpath'), // https://npmjs.org/package/xpath (npm install xpath)
         Dom = require('xmldom').DOMParser, // https://npmjs.org/package/xmldom (npm install xmldom)
         
         // OPTIONS
-        debug = options.debug || false,
+        // debug = options.debug || false,
         ignoreQuerySupport = options.ignoreQuerySupport === undefined || options.ignoreQuerySupport, // i.e., default is true
 
         // STATIC VARIABLES (though used to hold instances)
@@ -54,22 +52,23 @@ module.exports = function (options) {
     * @private
     * @constant
     */
-    function end (res, code, fileContents) {
-        res.statusCode = code;
-        res.end(fileContents); //  + '\n'
+    function clientSupportCheck (req, str) {
+        var reqHeaders = req.headers;
+        return reqHeaders['query-client-support'] &&
+            reqHeaders['query-client-support'].trim().split(/\s*,\s+/).indexOf(str) > -1;
     }
 
     /**
     * @private
     * @constant
     */
-    function clientSupportCheck (req, str) {
+    function expectedSupportCheck (req, str) {
         var reqHeaders = req.headers;
-        return reqHeaders['query-client-support'] &&
-            reqHeaders['query-client-support'].trim().split(/\s+/).indexOf(str) > -1;
+        return reqHeaders['expect'] &&
+            reqHeaders['expect'].trim().split(/\s*,\s+/).indexOf(str) > -1;
     }
 
-
+    
     /**
     * Due to the need for a Content-Type header, this function must be called
     *  after setContentTypeByFileExtension (or after setting Content-Type elsewhere); auto-detect option?
@@ -84,7 +83,7 @@ module.exports = function (options) {
         if (!contentType) {
             throw 'detectAndSetJSONHeaders() must be invoked after a Content-Type header is set, as through setContentTypeByFileExtension()';
         }
-        isJSON = req.headers['query-format'] === 'json';
+        isJSON = req.headers['query-format'] === 'json'; // Todo: Change to proper Accept: application/json
         if (isJSON) {
             res.setHeader('query-content-type', contentType);
             res.setHeader('Content-Type', 'application/json');
@@ -92,20 +91,14 @@ module.exports = function (options) {
         return isJSON;
     }
 
-    
-    /**
-    * @private
-    */
-    function exitError (res, err) {
-        var errorMessage = debug ? err : 'ERROR';
-        end(res, 404, '<div style="color:red;font-weight:bold">' + errorMessage + '</div>');
-    }
 
     function performQuery (req, res) {
         var doc, xpath1Request, queryResult, $, css3RequestFull, css3Request, queryType, css3Attr,
             fileContents = String(bufferMap.get(res, '')), // String() Necessary?
             clientXPath1Support = clientSupportCheck(req, 'xpath1'),
             clientCSS3Support = clientSupportCheck(req, 'css3'),
+            expectedXPath1 = expectedSupportCheck(req, 'xpath1'),
+            expectedCSS3 = expectedSupportCheck(req, 'css3'),
             isJSON = detectAndSetJSONHeaders(req, res),
             reqHeaders = req.headers,
             nodeArrayToSerializedArray = function (arr) {
@@ -160,78 +153,39 @@ module.exports = function (options) {
                     queryResult = $(css3Request); // Don't merge with next line as intermediate queryResult may be needed by wrapFragment
                     queryResult = wrapFragment(nodeArrayToSerializedArray(queryResult).join('')); // $(css3Request).toString(); handles merging
                     break;
+                default:
+                    throw 'Unexpected queryType';
             }
         }
         else {
             queryResult = fileContents;
         }
 
-        return fileContents = isJSON ? JSON.stringify(queryResult) : queryResult;
-        
-        end(res, 200, fileContents);
-    }
-
-
-    function readFile (req, res, path) {
-        fs.readFile(path, function (err, fileContents) {
-            if (err) {
-                return exitError(res, err);
-            }
-            
-            // performQuery (continue middleware)
-        });
-    }
-
-    /**
-    * @todo Replace this approach with https://gist.github.com/brettz9/5790179 or https://github.com/mscdex/mmmagic (detect from file content)
-    */
-    function setContentTypeByFileExtension (file, res) {
-        $h.url = file;
-        var contentType,
-            extension = path.extname(file).replace(/^\./, '');
-
-        res.setHeader('Content-Type', {
-            xhtml: 'application/xhtml+xml',
-            xml: 'application/xml',
-            tei: 'application/tei+xml'
-        }[extension] || 'text/html');
+        res.statusCode = 200;
+        return isJSON ? JSON.stringify(queryResult) : queryResult;
     }
     
     /**
     * @private
     * @constant
     */
-    function addQueryRangeSupports (res) {
+    function addQueryRangesSupported (res) {
+        var acceptRanges, oldAcceptRanges;
         oldAcceptRanges = res.getHeader('Accept-Ranges');
-        acceptRanges = ['xpath1', 'css3'].concat(oldAcceptRanges || []).join(', ');
+        acceptRanges = ['xpath1', 'css3'].concat(oldAcceptRanges || []).join(', '); // Could send "none" if NOT wishing to support any
+        // See http://tools.ietf.org/html/rfc2616#section-10.4.17 for returning error code: 416 Requested Range Not Satisfiable
+        // http://tools.ietf.org/html/rfc2616#section-10.4.17 for If-range
         res.setHeader('Accept-Ranges', acceptRanges); // was query-server-support
     }
 
     function handleRequestAndResponse (req, res) {
         // todo: Do some work here
-        var acceptRanges, oldAcceptRanges,
-            reqHeaders = req.headers,
-            newReq = {
-                // API
-                setContentTypeByFileExtension: function (url) {
-                    setContentTypeByFileExtension(url, res);
-                },
-                setStaticURL: function (url) {
-        if (!$h.url[0].match(/\w/) || $h.url.match(/\.\./)) {
-            return exitError(res, 'Disallowed character in file name');
-        }
-                    var pth = path.normalize(require('url').parse(url).pathname);
-                    pth = (!pth || pth.slice(-1) === '/') ? pth + 'index.html' : pth;
-                    this.setContentTypeByFileExtension(pth);
-                },
-                readFile: function (url) { // Todo: Allow a parameter at all?
-                    readFile(req, res, (url || $h.url));
-                }
-            };
+        var reqHeaders = req.headers;
 
-        addQueryRangeSupports(res);
+        addQueryRangesSupported(res);
         if (reqHeaders['query-client-support'] && !reqHeaders['query-request-xpath1'] && !reqHeaders['query-request-css3'] && !reqHeaders['query-full-request']) {
-            end(res, 200, ''); // Don't waste bandwidth if client supports protocol and hasn't asked us to deliver the full document
+            res.statusCode = 200;
+            return ''; // Don't waste bandwidth if client supports protocol and hasn't asked us to deliver the full document
             // Todo: we should allow delivery of a default payload (e.g., full doc if not specified as requesting empty for feature detection+immediate execution if supported)
         }
         return performQuery(req, res); // transformedContent
