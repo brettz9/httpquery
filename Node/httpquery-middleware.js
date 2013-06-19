@@ -59,6 +59,7 @@ module.exports = function (options) {
     }
 
     /**
+    * For when client requires a given behavior
     * @private
     * @constant
     */
