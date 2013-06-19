@@ -34,9 +34,9 @@ var modifyRequest,
         return removeAnchor(tabs.activeTab.url);
     },
     checkQueryServerSupport = function (header, queryType) {
-        var queryServerSupport = (/^query-server-support:\s*(.*?)\s*(?:\;|$)/mi).exec(header);
+        var queryServerSupport = (/^Accept-Ranges:\s*(.*?)\s*(?:\;|$)/mi).exec(header);
         return queryServerSupport && (
-            !queryType || (queryServerSupport[1].split(/\s+/).indexOf(queryType) > -1)
+            !queryType || (queryServerSupport[1].split(/\s*,\s*/).indexOf(queryType) > -1)
         );
     },
     /**
@@ -183,7 +183,7 @@ exports.main = function() {
             },
             executeXPath1OnDOMDocument = function (doc, contentType, format) {
                 var markup = serializeDOMNodes(docEvaluateArray(query, doc), contentType, format);
-                markup = format === 'json' ? JSON.stringify(markup) : markup.join();
+                markup = format === 'json' ? JSON.stringify(markup) : markup.join('');
                 handleMarkup(markup);
             },
             executeCSS3OnDOMDocument = function (doc, contentType, format) {
@@ -251,7 +251,7 @@ exports.main = function() {
                     },
                     onComplete: function (resp) {
                         var markup, doc, qctype, ctype, format, contentType,
-                            queryServerSupport = checkQueryServerSupport('query-server-support:'+resp.headers['query-server-support'], queryType);
+                            queryServerSupport = checkQueryServerSupport('Accept-Ranges:' + resp.headers['Accept-Ranges'], queryType);
                         /**
                         for (var headerName in resp.headers) {
                             console.log(headerName + " : " + resp.headers[headerName]);
@@ -314,7 +314,7 @@ exports.main = function() {
             var qss, channel = subject.QueryInterface(Ci.nsIHttpChannel);
 
             try {
-                qss = channel.getResponseHeader('query-server-support');
+                qss = channel.getResponseHeader('Accept-Ranges');
             }
             catch (e) {
                 qss = false;
