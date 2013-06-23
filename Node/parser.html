@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Parser test</title>
+    <script src="parser.js"></script>
+    <script>
+var str = 'query=xpath';
+
+var testing = new Parser(
+    {
+        parameter: (['attribute', 'LWSP', '=', 'LWSP', 'value']),
+        attribute: 'query',
+        LWSP: /\s*/,
+        value: 'xpath'
+    }
+);
+testing.parse(str, 'parameter', {
+    'attribute': function (att, level) {
+        alert('attribute:' + att);
+    },
+    'value': function (val, level) {
+        alert('value:' + value);
+    }
+});
+
+    </script>
+</head>
+<body>
+
+
+
+</body>
+</html>
