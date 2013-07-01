@@ -9,67 +9,163 @@ function preg_quote (str) {
   return str.replace(/[.\\+*?\[\^\]$(){}=!<>|:\-]/g, '\\$&');
 }
 
-function _processValues (property, object) {
-    var pattern, patternRegex, flags = '', match;
-    if (!object) {
+function isRegExp (obj) {
+    return obj && typeof obj.exec === 'function';
+}
+
+function _processValues (property, object, isAggregate, isAlias) {
+    var isAnArray, iTmp, sTmp, errorHandled, pattern, patternRegex, flags = '', match, that = this,
+        useStringProperty = !object && this.allowStringProperties, hasAlias = false;
+    isAggregate = !(isAggregate === false);
+    isAlias = isAlias || false;
+
+    if (useStringProperty) {
+        object = property;
+    }
+    else if (!object) {
         throw 'Unexpected empty value provided for _processValues using property: ' + property;
     }
+    isAnArray = Array.isArray(object);
     if (typeof object === 'string') { // a string reference or, if not so-named, a literal
-        pattern = this.allowStringProperties && this.mixedParseRules[object] ? _processValues(object, this.mixedParseRules[object]) : preg_quote(object);
+        if (this.allowStringProperties && this.mixedParseRules[object]) {
+            hasAlias = true;
+            // Note: match is not really the object, but we give a means of indicating the string
+            if (this.loggingCb) { // There is a "match", and not an error, so only need to call logging and callback
+                this.loggingCb(property, object, this.i, isAggregate, useStringProperty, hasAlias, isAlias);
+            }
+            if (this.callbackObj && this.callbackObj[property]) {
+                this.callbackObj[property](object, this.i, isAggregate, useStringProperty, hasAlias, isAlias);
+            }
+            return _processValues.call(this, object, this.mixedParseRules[object], isAggregate, hasAlias);
+        }
+        pattern = preg_quote(object);
     }
-    else if (object.exec) { // regular expressions
+    else if (isRegExp(object)) { // regular expressions
         pattern = object.source;
         flags = object.ignoreCase ? 'i' : '';
 //        this.mixedParseRules[i] = object;
     }
-    else if (Array.isArray(object)) { // an array representing a sequence of any of such other values here
+    else if (isAnArray) { // an array representing a sequence of any of such other values here
 //        this.mixedParseRules[i] = object;
         //tempObj = this.mixedParseRules['$sequence' + i] = {};
         // object.forEach(_processArgs, tempObj);
-        object.reduce(function (prev, item) {
-            return prev + _processValues(item, this.mixedParseRules[item]);
+        iTmp = this.i;
+        sTmp = this.s;
+        pattern = object.reduce(function (prev, item, i) {
+            var next = _processValues.call(that, item, that.mixedParseRules[item], false);
+            if (i > 0) {
+                next = next.replace(/\^/, '');
+            }
+            return prev + next;
         }, '');
+        // Todo: Reset back if not matched (and handling errors, thus allowing the code to reach the end of the array here)?
+        // If so, would need 2 more temporary variables here before setting this.i and this.s (for use after errorHandled)
+        this.i = iTmp;
+        this.s = sTmp;
     }
-    else { // a compiled object whose arguments can include any of these other values here
+/*    else if (object.compile) { // Transparently pass on arguments, as immaterial whether created by $() convenience or manually created
+        return _processValues.call(this, property, object.compile(), isAggregate, isAlias);
+    }*/
+    else if (object.source) {
+        pattern = object.source;
+        flags = object.flags;
+    }
+    else { // a compiled object whose arguments can include any of these other values here (including OR'd conditions)
 //        this.mixedParseRules[i] = object;
-alert(property+JSON.stringify(object)); // {"baseObj":{"0":{"0":"attribute","1":"LWSP","2":"=","3":"LWSP","4":"value"},"modifiers":{}}}
+
+// return _processValues.call(this, property, object.baseObj[0]);
+// Todo: fix
+// Todo: add hasAggregateParents too?
+alert(property+JSON.stringify(object));
+
+        pattern = object.or.reduce(function (prev, item) {
+            
+        });
+        flags = object.modifiers.join(''); // Todo: handle except, including
+/*
+e.g., 
+parameter{"or":[
+    ["attribute","LWSP","=","LWSP","value"],
+    {"or":["abc"],"modifiers":[]},
+    {"source":"abc","flags":"i"}
+],"modifiers":[]}
+*/
+
     }
-    
     if (typeof pattern === 'string') { // To get case-insensitive matching via a flag, will need to use a RegExp object instead
         pattern = pattern.indexOf('^') === -1 ? '^' + pattern : pattern; // Ensure we match from start only
         patternRegex = new RegExp(pattern, flags);
     }
     try {
-    match = patternRegex.exec(this.s);
-    }catch(e) {alert(JSON.stringify(object)); throw e;}
+        match = patternRegex.exec(this.s);
+    }
+    catch(e) {
+        alert(object);
+        throw e;
+    }
     
     if (match) {
-        this.i += match.length;
-        this.s = this.s.slice(match.length);
-        this.callbackObj[property](match, this.i);
+        this.i += match[0].length;
+        this.s = this.s.slice(match[0].length);
+        if (this.loggingCb) {
+            this.loggingCb(property, match[0], this.i, isAggregate, useStringProperty, hasAlias, isAlias);
+        }
+        if (this.callbackObj && this.callbackObj[property]) {
+            this.callbackObj[property](match[0], this.i, isAggregate, useStringProperty, hasAlias, isAlias);
+        }
+        // Only runs if not matched
+        else if (this.unmatchedCb) {
+            this.unmatchedCb(property, match[0], this.i, isAggregate, useStringProperty);
+        }
     }
-    else if (this.errorObj) {
-        this.errorObj.notMatched(this.s, pattern);
+    else {
+        if (this.errorObj) {
+            errorHandled = this.errorObj.notMatched(this.s, pattern, isAggregate, useStringProperty);
+        }
+        if (!errorHandled) {
+            throw 'Error not handled for property ' + property + // ' and object ' + object +
+            ' with mismatch of pattern ' + pattern + ' (isAlias: ' + isAlias + ', hasAlias: false, isAggregate: ' + isAggregate + ', useStringProperty: ' + useStringProperty +') at index ' + this.i + ' and string: ' + this.s;
+        }
     }
     return pattern;
 }
 
-
-function _mixin (targetObj, sourceObj) {
+/**
+* @param {Object} targetObj Object onto which to copy properties
+* @param {Object} sourceObj Object from which to copy properties
+* @param {Boolean} [deep] Defaults to true
+*/
+function _mixin (targetObj, sourceObj, deep) {
     var p, srcObjProp;
+    deep = !(deep === false);
     for (p in sourceObj) {
-        //if (sourceObj.hasOwnProperty(p)) {
+        if (deep || sourceObj.hasOwnProperty(p)) {
             srcObjProp = sourceObj[p];
             if (srcObjProp && typeof srcObjProp === 'object') {
-                targetObj[p] = _mixin(targetObj[p] || {}, srcObjProp);
+                if (isRegExp(srcObjProp)) {
+                    targetObj[p] = new RegExp(srcObjProp.source,
+                        (srcObjProp.global ? 'g' : '') +
+                        (srcObjProp.ignoreCase ? 'i' : '') +
+                        (srcObjProp.multiline ? 'm' : '') +
+                        (srcObjProp.sticky ? 'y' : '') // non-standard
+                    );
+                    // We avoid copying deprecated properties
+                    targetObj[p].lastIndex = srcObjProp.lastIndex; // Settable and works
+                }
+                else {
+                    targetObj[p] = _mixin(targetObj[p] || (Array.isArray(srcObjProp) ? [] : {}), srcObjProp);
+                }
             }
             else {
                 targetObj[p] = sourceObj[p];
             }
-        //}
+        }
     }
-//    alert(JSON.stringify(targetObj));
     return targetObj;
+}
+
+function a (obj) {
+    alert(JSON.stringify(obj));
 }
 
 function Parser () {
@@ -80,20 +176,23 @@ function Parser () {
     c) a compiled object whose arguments can include any of these other values here in a-d
     d) an array representing a sequence of any of such values here in a-d
     */
+//alert(Array.prototype.slice.call(arguments)[0].LWSP);
     this.mixedParseRules = Array.prototype.slice.call(arguments).reduce(function (targetObj, sourceObj) {
         return _mixin(targetObj, sourceObj);
     }, {});
 }
-Parser.prototype.parse = function (str, startProperty, callbackObj, errorObj, options) {
+Parser.prototype.parse = function (str, startProperty, callbackObj, errorObj, unmatchedCb, loggingCb, options) {
     this.callbackObj = callbackObj;
     this.errorObj = errorObj;
+    this.unmatchedCb = unmatchedCb;
+    this.loggingCb = loggingCb;
     this.originalStr = str;
     this.s = str;
     this.i = 0;
+    this.startProperty = startProperty;
     this.allowStringProperties = options ? options.allowStringProperties : true; // To avoid potential conflicts between property names and string literals (encapsulate within $() instead)
     _processValues.call(this, startProperty, this.mixedParseRules[startProperty]);
 };
-
 
 function _processArgs (item, i) {
     var tempObj;
@@ -103,7 +202,7 @@ function _processArgs (item, i) {
     if (typeof item === 'string') { // a string reference or, if not so-named, a literal
         this.baseObj[i] = item;
     }
-    else if (typeof item.exec) { // regular expressions
+    else if (isRegExp(item)) { // regular expressions
         this.baseObj[i] = item;        
     }
     else if (Array.isArray(item)) { // an array representing a sequence of any of such other values here
@@ -116,7 +215,6 @@ function _processArgs (item, i) {
     }
 }
 
-
 function _processModifiers () {
 
 }
@@ -128,41 +226,50 @@ function $ () {
     return new $.init(Array.prototype.slice.call(arguments));
 }
 $.init = function (args) {
-    this.baseObj = args;
-    this.baseObj.modifiers = [];
+    this.or = args.map(function (arg) {
+        var obj;
+        if (isRegExp(arg)) { // Handle regular expressions so JSON.stringify can serialize them properly
+            obj = {};
+            obj.source = arg.source;
+            obj.flags = arg.ignoreCase ? 'i' : '';
+            return obj;
+        }
+        return arg;
+    });
+    this.modifiers = [];
 };
 $.init.prototype = {
-    compile: function () {
-        this.baseObj.forEach(_processArgs, this);
-        this.baseObj.modifiers.forEach(_processModifiers, this);
+    compile: function () { // Not needed? (Nor is toJSON())
+        //this.baseObj.or.forEach(_processArgs, this);
+        //this.baseObj.modifiers.forEach(_processModifiers, this);
         return this;
     },
     zeroOrMore: function () {
-        this.baseObj.modifiers.push('*');
+        this.modifiers.push('*');
         return this;
     },
     zeroOrOne: function () {
-        this.baseObj.modifiers.push('?');
+        this.modifiers.push('?');
         return this;
     },
     range: function (min, max) {
-        this.baseObj.modifiers.push('{' + min + (max ? ',' + max : ',') + '}');
+        this.modifiers.push('{' + min + (max ? ',' + max : ',') + '}');
         return this;
     },
     exactly: function (val) {
-        this.baseObj.modifiers.push('{' + val + '}');
+        this.modifiers.push('{' + val + '}');
         return this;
     },
     oneOrMore: function () {
-        this.baseObj.modifiers.push('+');
+        this.modifiers.push('+');
         return this;
     },
     except: function () {
-        this.baseObj.modifiers.push('except');
+        this.modifiers.push('except');
         return this;
     },
     including: function () {
-        this.baseObj.modifiers.push('including');
+        this.modifiers.push('including');
         return this;
     }
 };

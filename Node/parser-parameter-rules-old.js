@@ -1,7 +1,3 @@
-var PEG = require('pegjs'),
-    // Can call toSource() on parser to get source
-    parser = PEG.buildParser("start = ('a' / 'b')+"); // Could take second argument of boolean options, "cache" and "trackLineAndColumn"
-    parse.parse(str);
 
 /*
 1) Accepts object mapping names (used if reporting and for self-referencing) to:

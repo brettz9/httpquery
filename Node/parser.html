@@ -9,18 +9,50 @@ var str = 'query=xpath';
 
 var testing = new Parser(
     {
-        parameter: (['attribute', 'LWSP', '=', 'LWSP', 'value']),
+        parameter: $(['attribute', 'LWSP', '=', 'LWSP', 'value'], $('abc'), /abc/i),
         attribute: 'query',
+        /**
+        attribute: 'query2',
+        query2: 'query',
+        // query2: 'query2', // to throw error
+        //*/
         LWSP: /\s*/,
         value: 'xpath'
     }
 );
+
+/**
+// Working
+var b = [];
+testing.parse(str, 'parameter', null, null, null, function (prop, match, idx, isAggregate, useStringProperty, hasAlias, isAlias) {
+    //if (prop !== this.startProperty) { // works to avoid largest aggregate
+//    alert(prop +'::'+ match+'::'+ idx+'::'+ isAggregate+'::'+ useStringProperty+'::'+ hasAlias+'::'+ isAlias);
+
+    if (!isAggregate &&
+        // !hasAlias) { // Get the deferenced item
+        !isAlias) { // Get the initial referencing item instead of dereferenced
+        b.push(prop);
+    }
+});
+alert(b.join());
+throw 'exit';
+//*/
+
 testing.parse(str, 'parameter', {
+    'parameter': function (att, level) {
+        alert('parameter:' + att + ':' + level);
+    },
     'attribute': function (att, level) {
-        alert('attribute:' + att);
+        alert('attribute:' + att + ':' + level);
     },
     'value': function (val, level) {
-        alert('value:' + value);
+        alert('value:' + val + ':' + level);
+    },
+    /*'LWSP': function (val, level) {
+        alert('LWSP:' + val + ':' + level);
+    },*/
+    '=': function (val, level) {
+        alert('equals:' + val + ':' + level);
     }
 });
 
@@ -28,7 +60,9 @@ testing.parse(str, 'parameter', {
 </head>
 <body>
 
-
+<!--
+<h1>Parser test</h1>
+-->
 
 </body>
 </html>
