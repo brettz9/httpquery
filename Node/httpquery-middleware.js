@@ -35,7 +35,8 @@ module.exports = function (options) {
 
     var  
         // REQUIRES
-        WeakMap = require('es6-collections'),        
+        rfc5987 = require('rfc5987-utils'),
+        WeakMap = require('es6-collections'),
         cheerio = require('cheerio'), // https://github.com/MatthewMueller/cheerio
         xpath = require('xpath'), // https://npmjs.org/package/xpath (npm install xpath)
         Dom = require('xmldom').DOMParser, // https://npmjs.org/package/xmldom (npm install xmldom)
@@ -51,7 +52,7 @@ module.exports = function (options) {
         supportedRanges = ['xpath1', 'css3'],
         lwsf = '(?:(\\r\\n)?[ \\u0009])*',
         // Todo: overly simplistic as could be commas or semicolons inside
-        regexListSeparator = new RegExp(lwsf + ',' + lwsf, '');
+        regexListSeparator = new RegExp(lwsf + ',' + lwsf, ''),
         regexParamSeparator = new RegExp(lwsf + ';' + lwsf, '');
 
     /**
@@ -145,25 +146,10 @@ module.exports = function (options) {
     function getQueryRequest (req) {
         return queryRequestCheck(req, 'expr\\*' + lwsf + '=' + lwsf + 'UTF-8\'\'(.*)$');
     }
-    
-    /**
-    * Not in use; use for client-side code
-    */
-    function encodeRFC5987ValueChars (str) {
-        return encodeURIComponent(str).
-            // Note that although RFC3986 reserves "!", RFC5987 does not, so we do not need to escape it
-            replace(/['()]/g, escape). // i.e., %27 %28 %29
-            replace(/\*/g, '%2A').
-                // The following are not required for percent-encoding per RFC5987, so we'll allow for a little better readability over the wire: |`^
-                replace(/%(?:7C|60|5E)/g, unescape);
-    }
-    function decodeRFC5987ValueChars (str) {
-        return unescape(str);
-    }
 
     function getQueryRequestDecoded (req) {
         // percent encodings to be produced as uppercase per http://tools.ietf.org/html/rfc3986#section-2.1 (referenced by http://tools.ietf.org/html/rfc5987#section-3.2.1 )
-        return decodeRFC5987ValueChars(getQueryRequest(req));
+        return rfc5987.decodeValueChars(getQueryRequest(req));
     }
 
     function getQueryRequestType (req) {
