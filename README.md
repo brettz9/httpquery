@@ -1,5 +1,4 @@
-httpquery
-=========
+# httpquery
 
 *HTTP query protocol with proof-of-concept implementations obtaining
 subsets of remote HTML data via XPath or CSS Selectors, essentially
@@ -8,8 +7,7 @@ importing of data (the server will simply read your static HTML/XML files
 on demand and deliver a subset of this data as queried by the user
 or application).*
 
-Components
-==========
+# Components
 
 HTTPQuery is an *experimental* protocol with the following tools:
 * Proof-of-concept **Firefox addon** (web app to
@@ -26,8 +24,7 @@ server subfolder ("Node" or "PHP")). Please see their respective README's.
 
 A PHP demo server is also planned.
 
-INTRODUCTION (IMPORTANT)
-=========================
+# INTRODUCTION (IMPORTANT)
 
 Despite the fact that the ubiquitous files of the web, HTML files, are
 THEMSELVES databases, there has been a curious lack of ability
@@ -60,8 +57,7 @@ its data becomes opened--for the humblest content creator
 to experienced mashup developers.
 
 
-Future goals (general)
-=================
+# Future goals (general)
 
 While the first goal is to allow regular website content creators to
 have their content available to searches--with HTML/XML being
@@ -76,8 +72,7 @@ this functionality to be made available to users.
 
 See the todos for more future goals for the project.
 
-FAQ
-====
+# FAQ
 * *Why require headers rather than GET-friendly bookmarkable/shareable request parameters?* - I wanted the protocol to be able to overlay any dynamic as well as static system which might already be using its own request parameters. However, I would like to see a non-HTTP web protocol be created to work with these headers.
 
 * *If I generate my data dynamically (e.g., because I have files too large to be efficiently queried against a static file), how is the protocol still useful?* - The query mechanism and API will still be reusable by local apps (or remote ones such as the Firefox add-on if the server is enabled in a manner like the included Node server), code libraries, etc., even if you do not wish to restrict yourself to static files. For example, even though your API might filter the raw data as it is, an HTTPQuery could be allowed to run on top of that filtered data.
@@ -86,8 +81,7 @@ FAQ
 piecemeal selection of content in a manner reusable by servers and clients with an absolutely bare minimum of effort by content
 creators (and even implementers).
 
-Informal, tentative specification for HTTP Query headers
-===========================================
+# Informal, tentative specification for HTTP Query headers
 
 1. The client MAY submit a **query-client-support** header including a whitespace-separated list of supported query mechanisms (currently `xpath1` and `css3`). The HTTPQuery server MUST NOT require this header when other HTTPQuery queries are supplied.  (The server MAY utilize the client support header to display minimal content by default since the client user is assumed to be familiar with his own browser's capabilities in utilizing the protocol to query only what he needs. The header **query-full-request** MAY be submitted (instead or in addition) by the client to counter-act this assumption to display minimal content. If the client wishes to make the request for minimal data explicit, it can make a HEAD request.)
 2. The server SHOULD advertise **query-server-support** with a space-separated list of supported query types (currently `xpath1` and `css3`) before specific queries are made and MUST advertise the header when queries are successfully returned (and SHOULD return the header if there is a failure). This information MAY be used by clients to inform users of the query mechanisms available to them for the site.
@@ -95,8 +89,7 @@ Informal, tentative specification for HTTP Query headers
 4. Since queries may return node sets, the question arises as to how to group nodes in the results. In the case of normal HTML payloads, a query-supporting server MUST join together XPath1 and CSS3 query results as a string and without a separator between elements. In the case of normal XML payloads, since well-formedness will typically be expected and it is possible that more than one item is returned (i.e., without a single root node), a query-supporting server MUST wrap the resulting XML element(s) within a `div` element in the XHTML namespace (i.e., within `<div xmlns="http://www.w3.org/1999/xhtml"></div>`). The query-supporting server of XPath1 or CSS3 queries MUST also support the ability to recognize an additional client-supplied header, **query-format** set to the value `json` which will deliver  the XML or HTML results in the JSON format while also recognizing the header **query-content-type** which will indicate the content-type of the wrapped fragments (i.e., text/html or an XML MIME type) as distinct from the regular **Content-Type** header which for JSON should be `application/json`.
 5. The query-supporting server for CSS3 queries MUST support two extensions described below for obtaining an attribute value or text nodes. In such cases, the format will be a string.  The query-supporting server of such queries MUST also support the ability to recognize an additional client-supplied header, **query-format** set to the value `json` so as to deliver the string in JSON format. A **query-content-type** response header MAY be provided if set to `text/plain`. (Headers may be added in the future to distinguish whether JSON delivery should concatenate text node results into a single string or not.)
 
-CSS Selector modifications
-=====================
+# CSS Selector modifications
 
 The CSS Selector syntax has been modified to include the following
 pseudo-classes:
@@ -106,17 +99,16 @@ in the node set). This is necessary since attribute selectors are used
 in CSS to target elements rather than attributes.
 * **text()** - Grab the text nodes within the node set
 
-Comparison with OData
-==================
+# Comparison with OData
 
 HTTP Query is a much lighter protocol. HTTP Query does hope to eventually support modification as does OData,
 but in a web-friendly, hierarchical manner such as with https://github.com/kriszyp/put-selector.
 
 (INCOMPLETE)
 
-Ideas for possible future todos
-========================
+# Ideas for possible future todos
 
+1. i18n-ize
 1. Add tests (especially ensuring content-type works properly with each mode)
 1. Add an Ajax site-independent web application, including ability to supply arbitrary URLs with cross-site headers or making AsYouWish requests (would be facilitated by https://bugzilla.mozilla.org/show_bug.cgi?id=880908 ; see also https://bugzilla.mozilla.org/show_bug.cgi?id=855936 )
     * Do demos against HTML tables, HTML Microdata, TEI (XML)
