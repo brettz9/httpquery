@@ -109,7 +109,8 @@ in CSS to target elements rather than attributes.
 Comparison with OData
 ==================
 
-HTTP Query is a much lighter protocol. HTTP Query does hope to eventually support modification as does OData, but in a friendly, hierarchical manner such as with https://github.com/kriszyp/put-selector.
+HTTP Query is a much lighter protocol. HTTP Query does hope to eventually support modification as does OData,
+but in a web-friendly, hierarchical manner such as with https://github.com/kriszyp/put-selector.
 
 (INCOMPLETE)
 
