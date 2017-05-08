@@ -1,5 +1,8 @@
 # httpquery
 
+***Note that this is still in alpha stages, so may be unstable or
+non-functional***
+
 *HTTP query protocol with proof-of-concept implementations obtaining
 subsets of remote HTML data via XPath or CSS Selectors, essentially
 providing the likes of a native XML database, but without need for any

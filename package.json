@@ -1,0 +1,30 @@
+{
+  "name": "httpquery",
+  "version": "0.0.1",
+  "author": "Brett Zamir",
+  "contributors": [],
+  "description": "HTTP query protocol with proof-of-concept implementations obtaining subsets of remote HTML data via XPath or CSS Selectors",
+  "main": "Node/index",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brettz9/httpquery.git"
+  },
+  "keywords": [
+    "HTTP",
+    "query",
+    "XPath",
+    "CSS",
+    "selectors",
+    "CSSSelectors"
+  ],
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {},
+  "bugs": {
+    "url": "https://github.com/brettz9/httpquery/issues"
+  },
+  "homepage": "https://github.com/brettz9/httpquery#readme"
+}
