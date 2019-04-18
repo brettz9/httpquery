@@ -79,7 +79,7 @@ http.createServer(function (req, res) {
         if ((ignoreQuerySupport || clientXPath1Support) && req.headers['query-request-xpath1'] && !req.headers['query-full-request']) {
             doc = new Dom().parseFromString(String(fileContents));
             xpath1Request = req.headers['query-request-xpath1'] && req.headers['query-request-xpath1'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
-            queryResult = xpath.select(xpath1Request, doc);
+            queryResult = xpath.select(xpath1Request, doc); // lgtm [js/xpath-injection]
             queryResult = isJSON ? nodeArrayToSerializedArray(queryResult) : wrapFragment(nodeArrayToSerializedArray(queryResult).join(''));
         }
         else if ((ignoreQuerySupport || clientCSS3Support) && req.headers['query-request-css3'] && !req.headers['query-full-request']) {
@@ -108,7 +108,7 @@ http.createServer(function (req, res) {
                 break;
             // Todo: Change 'text' to return array of text nodes in case of JSON?
             case 'text':
-                queryResult = $(css3Request)[type]();
+                queryResult = $(css3Request).text();
                 break;
             case 'toString':
                 queryResult = $(css3Request); // Don't merge with next line as intermediate queryResult may be needed by wrapFragment
