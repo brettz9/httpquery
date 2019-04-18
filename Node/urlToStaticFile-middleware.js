@@ -3,7 +3,7 @@
 (function (options) {
 'use strict';
 
-var 
+var
     // REQUIRES
     fs = require('fs'),
     path = require('path'),
@@ -57,7 +57,7 @@ function readFile (req, res, path) {
         if (err) {
             return exitError(res, err);
         }
-        
+
         // performQuery (continue middleware)
     });
 }
@@ -245,7 +245,7 @@ module.exports = (function () {
 
     return {
         extensionTypeMap: extensionTypeMap,
-        
+
         getExtensionForPath: function (path) { // or for Node, require('path').extname(path) but this includes "."
             var i = path.lastIndexOf('.');
             return (i < 0) ? '' : path.substr(i);

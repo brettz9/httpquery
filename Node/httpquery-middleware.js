@@ -1,4 +1,4 @@
-/*globals module, require, escape, unescape */
+/*globals module, require */
 
 /*
 In order to allow customization by the user depending on a
@@ -33,14 +33,13 @@ allow async use or something?)
 module.exports = function (options) {
     'use strict';
 
-    var  
+    var
         // REQUIRES
         rfc5987 = require('rfc5987-utils'),
-        WeakMap = require('es6-collections'),
         cheerio = require('cheerio'), // https://github.com/MatthewMueller/cheerio
         xpath = require('xpath'), // https://npmjs.org/package/xpath (npm install xpath)
         Dom = require('xmldom').DOMParser, // https://npmjs.org/package/xmldom (npm install xmldom)
-        
+
         // OPTIONS
         // debug = options.debug || false,
         ignoreQuerySupport = options.ignoreQuerySupport === undefined || options.ignoreQuerySupport, // i.e., default is true
@@ -61,14 +60,14 @@ module.exports = function (options) {
     function preferHeaderCheck (req, regexStr) {
         var reqHeaders = req.headers,
             regex = new RegExp(regexStr, 'i');
-        
+
         // Todo: How does Node encode multiple Prefer requests?
         return reqHeaders.prefer &&
             reqHeaders.prefer.trim().split(regexListSeparator).some(function (expectation) {
                 return expectation.match(regex);
             });
     }
-    
+
     /**
     * @private
     * @constant
@@ -78,7 +77,7 @@ module.exports = function (options) {
         return preferHeaderCheck(req, '^inform-of-query-support\\s*=\\s*("?)(?:[^\\s\\|]+\\|)*' + queryTypeStr + '(?:\\s*\\|(?:[^\\s|]+)*)*\\1$');
         //    reqHeaders['query-client-support'].trim().split(/\s*,\s+/).indexOf(queryTypeStr) > -1;
     }
-    
+
     /**
     * @param {Object} req The HTTP request
     * @param {"minimal"|"representation"} returnType
@@ -86,7 +85,7 @@ module.exports = function (options) {
     function returnCheck (req, returnType) {
         return preferHeaderCheck(req, '^return\\s*=\\s*("?)' + returnType + '\\1$');
     }
-    
+
 
     /**
     * For when client requires a given behavior
@@ -103,7 +102,7 @@ module.exports = function (options) {
         }, null);
     }
 
-    
+
     /**
     * Due to the need for a Content-Type header, this function must be called
     *  after setContentTypeByFileExtension (or after setting Content-Type elsewhere); auto-detect option?
@@ -114,7 +113,7 @@ module.exports = function (options) {
     function detectAndSetJSONHeaders (req, res) {
         var isJSON,
             contentType = res.getHeader('Content-Type');
-        
+
         if (!contentType) {
             throw 'detectAndSetJSONHeaders() must be invoked after a Content-Type header is set, as through setContentTypeByFileExtension()';
         }
@@ -125,7 +124,7 @@ module.exports = function (options) {
         }
         return isJSON;
     }
-    
+
     // Todo: abstract to avoid duplication with preferHeaderCheck
     function queryRequestCheck (req, regexStr) {
         var queryRequest = req.headers['query-request'],
@@ -134,14 +133,14 @@ module.exports = function (options) {
         if (!queryRequest) {
             return false;
         }
-        
+
         // Todo: we could allow for other checks, e.g., a property for namespace resolvers
         return queryRequest.trim().split(regexParamSeparator).slice(1).reduce(function (prev, expectation) {
             var match = expectation.match(regex);
             return prev || (match && match[1]);
         }, null);
     }
-   
+
     // We use approach of RFC5987 ({@link http://tools.ietf.org/html/rfc5987})
     function getQueryRequest (req) {
         return queryRequestCheck(req, 'expr\\*' + lwsf + '=' + lwsf + 'UTF-8\'\'(.*)$');
@@ -189,7 +188,7 @@ module.exports = function (options) {
             res.statusCode = 417;
             return 'Expectation failed: there is no "' + expectedOther.replace(/(^"|"$)/g, '') + '" value';
         }
-        
+
         queryRequestType = getQueryRequestType(req);
         if ((ignoreQuerySupport || clientXPath1Support) && queryRequestType === 'xpath1' && !returnCheck(req, 'representation')) { // returnCheck() was a check for reqHeaders['query-full-request']; queryRequestType query-request test was query-request-xpath1
             doc = new Dom().parseFromString(fileContents);
@@ -213,7 +212,7 @@ module.exports = function (options) {
                      return $(this).toString();
                 });
             };
-            
+
             switch (queryType) {
                 case 'attr': // Only gets one attribute anyways, so no need to handle differently for JSON (except the stringify below)
                     queryResult = $(css3Request).attr(css3Attr);
@@ -240,7 +239,7 @@ module.exports = function (options) {
         res.statusCode = 200;
         return isJSON ? JSON.stringify(queryResult) : queryResult;
     }
-    
+
     /**
     * @private
     */
@@ -272,12 +271,12 @@ module.exports = function (options) {
     */
     return function (req, res, next) {
         var _end = res.end;
-        
+
         // Todo: Handle encoding argument on this method (use https://github.com/bnoordhuis/node-iconv or https://github.com/bnoordhuis/node-buffertools ?)
         res.write = function (chunk, encoding) {
             bufferMap.set(res, bufferMap.get(res, '') + chunk);
         };
-        
+
         res.end = function (data, encoding) {
             this.write(data, encoding); // We'll leave it to _end() using the result of handleRequestAndResponse() to do the real writing
             _end.call(
@@ -289,3 +288,19 @@ module.exports = function (options) {
         next();
     };
 };
+
+
+/**
+* Not in use; use for client-side code
+*/
+function encodeRFC5987ValueChars (str) {
+    return encodeURIComponent(str).
+        // Note that although RFC3986 reserves "!", RFC5987 does not, so we do not need to escape it
+        replace(/['()]/g, escape). // i.e., %27 %28 %29
+        replace(/\*/g, '%2A').
+            // The following are not required for percent-encoding per RFC5987, so we'll allow for a little better readability over the wire: |`^
+            replace(/%(?:7C|60|5E)/g, unescape);
+}
+function decodeRFC5987ValueChars (str) {
+    return unescape(str);
+}

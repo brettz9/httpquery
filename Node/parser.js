@@ -69,8 +69,7 @@ function _processValues (property, object, isAggregate, isAlias) {
     else if (object.source) {
         pattern = object.source;
         flags = object.flags;
-    }
-    else { // a compiled object whose arguments can include any of these other values here (including OR'd conditions)
+    } else { // a compiled object whose arguments can include any of these other values here (including OR'd conditions)
 //        this.mixedParseRules[i] = object;
 
 // return _processValues.call(this, property, object.baseObj[0]);
@@ -79,11 +78,11 @@ function _processValues (property, object, isAggregate, isAlias) {
 alert(property+JSON.stringify(object));
 
         pattern = object.or.reduce(function (prev, item) {
-            
+
         });
         flags = object.modifiers.join(''); // Todo: handle except, including
 /*
-e.g., 
+e.g.,
 parameter{"or":[
     ["attribute","LWSP","=","LWSP","value"],
     {"or":["abc"],"modifiers":[]},
@@ -103,7 +102,7 @@ parameter{"or":[
         alert(object);
         throw e;
     }
-    
+
     if (match) {
         this.i += match[0].length;
         this.s = this.s.slice(match[0].length);
@@ -203,7 +202,7 @@ function _processArgs (item, i) {
         this.baseObj[i] = item;
     }
     else if (isRegExp(item)) { // regular expressions
-        this.baseObj[i] = item;        
+        this.baseObj[i] = item;
     }
     else if (Array.isArray(item)) { // an array representing a sequence of any of such other values here
         this.baseObj[i] = item;
@@ -239,36 +238,36 @@ $.init = function (args) {
     this.modifiers = [];
 };
 $.init.prototype = {
-    compile: function () { // Not needed? (Nor is toJSON())
+    compile () { // Not needed? (Nor is toJSON())
         //this.baseObj.or.forEach(_processArgs, this);
         //this.baseObj.modifiers.forEach(_processModifiers, this);
         return this;
     },
-    zeroOrMore: function () {
+    zeroOrMore () {
         this.modifiers.push('*');
         return this;
     },
-    zeroOrOne: function () {
+    zeroOrOne () {
         this.modifiers.push('?');
         return this;
     },
-    range: function (min, max) {
+    range (min, max) {
         this.modifiers.push('{' + min + (max ? ',' + max : ',') + '}');
         return this;
     },
-    exactly: function (val) {
+    exactly (val) {
         this.modifiers.push('{' + val + '}');
         return this;
     },
-    oneOrMore: function () {
+    oneOrMore () {
         this.modifiers.push('+');
         return this;
     },
-    except: function () {
+    except () {
         this.modifiers.push('except');
         return this;
     },
-    including: function () {
+    including () {
         this.modifiers.push('including');
         return this;
     }

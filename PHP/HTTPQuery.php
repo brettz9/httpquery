@@ -11,7 +11,7 @@ class HTTPQuery {
 
     public function __construct ($requireFile = false) {
         $this->requireFile = $requireFile;
-        
+
         // CSS and XPath
         //$file = pathinfo(__FILE__, PATHINFO_FILENAME) ? __FILE__ : 'index.html'; // Cut off initial slash
         //$file = dirname(__FILE__) . '/index.html';
@@ -19,7 +19,7 @@ class HTTPQuery {
             $this->exitError('You must configure htaccess properly');
         }
         $file = $_GET['__httpQueryOriginalURL'];
-        
+
         $this->isXHTML = $isXHTML = preg_match('@\\.xhtml@', $file);
         $isXML = preg_match('@\\.xml@', $file);
         $isTEI = preg_match('@\\.tei@', $file);
@@ -35,12 +35,12 @@ class HTTPQuery {
         $this->setResponseHeaders();
         $this->executeQuery();
     }
-    
+
     /**
     * (Allow overriding for non-Apache servers)
     */
     protected function getRequestHeaders () {
-        $this->requestHeaders = apache_request_headers();    
+        $this->requestHeaders = apache_request_headers();
     }
 
     protected function setResponseHeaders () {
@@ -65,7 +65,7 @@ class HTTPQuery {
 
     public function write ($code, $fileContents) {
         header(':', true, $code); // http_response_code($code); // PHP >= 5.4
-        
+
         foreach ($this->responseHeaders as $header => $content) {
             header($header . ': ' . $content);
         }
@@ -98,7 +98,7 @@ class HTTPQuery {
         }
         return $arr;
     }
-    
+
     protected function nodeObjectToSerializedArray ($items) {
         // Convert iterator to normal array
         $arr = array();
@@ -126,7 +126,7 @@ class HTTPQuery {
     }
 
     protected function executeQuery () {
-    
+
         if (!preg_match('@\\w@', $this->file[0]) || preg_match('@\\.\\.@', $this->file)) {
             return $this->exitError('Disallowed character in file name', 404);
         }
@@ -138,7 +138,7 @@ class HTTPQuery {
         else {
             $fileContents = file_get_contents($this->file);
         }
-        
+
         if (!$fileContents) {
             return $this->exitError('Could not get file', 404);
         }
@@ -156,12 +156,12 @@ class HTTPQuery {
             else {
                 $doc->loadXML((string) $fileContents);
             }
-        
+
             $xpath1Request = trim($this->requestHeaders['query-request-xpath1']); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
-            
+
             $xpath = new DOMXPath($doc);
             $queryResult = $xpath->evaluate($xpath1Request);
-            
+
             $queryResult = $this->isJSON ? $this->nodeArrayToSerializedArray($doc, $queryResult) :
                                                                     $this->wrapFragment(implode('', $this->nodeArrayToSerializedArray($doc, $queryResult)));
         }
@@ -181,7 +181,7 @@ class HTTPQuery {
             $css3Request = $css3RequestFull[1];
             $type = isset($css3RequestFull[2]) ? $css3RequestFull[2] : ($this->isJSON ? 'toArray' : '__toString');
             $css3Attr = isset($css3RequestFull[3]) ? $css3RequestFull[3] : null;
-            
+
             switch ($type) {
                 case 'attr': // Only gets one attribute anyways, so no need to handle differently for JSON (except the stringify below)
                     $queryResult = $_[$css3Request][0]->attr($css3Attr);

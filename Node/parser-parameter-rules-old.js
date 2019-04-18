@@ -39,7 +39,7 @@ var rfc2616ParameterRules = new Parser(
         */
         'CTL': /^[\x00-\x1f\x7f]/,
         /*
-        separators     =  
+        separators     =
                       "(" | ")" | "<" | ">" | "@"
                       | "," | ";" | ":" | "\" | <">
                       | "/" | "[" | "]" | "?" | "="
@@ -98,7 +98,7 @@ var rfc5987ParameterRules = new Parser(
         http://tools.ietf.org/html/rfc5987#section-3.2.1
         // parameter     = reg-parameter / ext-parameter
         */
-        parameter: $('reg-parameter', 'ext-parameter'),        
+        parameter: $('reg-parameter', 'ext-parameter'),
         // reg-parameter = parmname LWSP "=" LWSP value
         'reg-parameter': ['parmname', 'LWSP', '=', 'LWSP', 'value'],
         // ext-parameter = parmname "*" LWSP "=" LWSP ext-value
@@ -177,7 +177,7 @@ var rfc5987ParameterRules = new Parser(
                    / 3DIGIT              ; UN M.49 code
         */
         region: $(
-            $('ALPHA').exactly(2), 
+            $('ALPHA').exactly(2),
             $('DIGIT').exactly(3)
         ),
         /*
@@ -185,7 +185,7 @@ var rfc5987ParameterRules = new Parser(
                    / (DIGIT 3alphanum)
         */
         variant: $(
-            $('alphanum').range(5, 8), 
+            $('alphanum').range(5, 8),
             $('DIGIT', $('alphanum').exactly(3))
         ),
         /*

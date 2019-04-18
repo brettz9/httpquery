@@ -21,8 +21,15 @@
     "CSSSelectors"
   ],
   "license": "MIT",
-  "dependencies": {},
-  "engines": {},
+  "dependencies": {
+    "cheerio": "0.22.0",
+    "htteepee": "0.3.0",
+    "xmldom": "0.1.27",
+    "xpath": "0.0.24"
+  },
+  "engines": {
+    "node": ">= 7.7.4"
+  },
   "bugs": {
     "url": "https://github.com/brettz9/httpquery/issues"
   },

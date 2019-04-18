@@ -1,4 +1,4 @@
-/*globals require*/
+/* globals require */
 // Todo: Make this integratable into a pipeline; ensure can use HTML or XML DOM with content-type accordingly
 // Use JSDOM or http://zombie.labnotes.org/ ?
 (function () {
@@ -22,8 +22,8 @@ var debug = 1,
     clientSupportCheck = function (req, str) {
         return req.headers['query-client-support'] &&
             req.headers['query-client-support'].trim().split(/\s+/).indexOf(str) > -1;
-    };    
-    
+    };
+
 http.createServer(function (req, res) {
     var url = req.url.slice(1) || 'index.html', // Cut off initial slash
         clientXPath1Support = clientSupportCheck(req, 'xpath1'),
@@ -45,7 +45,7 @@ http.createServer(function (req, res) {
     if (isJSON) {
         responseHeaders['query-content-type'] = resultContentType;
     }
-    
+
     if (req.headers['query-client-support'] && !req.headers['query-request-xpath1'] && !req.headers['query-request-css3'] && !req.headers['query-full-request']) {
         responseHeaders['query-server-support'] = 'xpath1 css3';
         write(res, 200, responseHeaders, ''); // Don't waste bandwidth if client supports protocol and hasn't asked us to deliver the full document
@@ -54,11 +54,11 @@ http.createServer(function (req, res) {
     else {
         responseHeaders['query-server-support'] = 'xpath1 css3';
     }
-    
+
     if (!url[0].match(/\w/) || url.match(/\.\./)) {
         return exitError(res, responseHeaders, 'Disallowed character in file name');
     }
-    
+
     fs.readFile(url, function (err, fileContents) {
         if (err) {
             return exitError(res, responseHeaders, err);
@@ -98,33 +98,32 @@ http.createServer(function (req, res) {
                      return $(this).toString();
                 });
             };
-            
+
             switch (type) {
-                case 'attr': // Only gets one attribute anyways, so no need to handle differently for JSON (except the stringify below)
-                    queryResult = $(css3Request).attr(css3Attr);
-                    break;
-                case 'toArray':
-                    queryResult = nodeArrayToSerializedArray($(css3Request)); // $(css3Request).toString(); handles merging
-                    break;
-                // Todo: Change 'text' to return array of text nodes in case of JSON?
-                case 'text':
-                    queryResult = $(css3Request)[type]();
-                    break;
-                case 'toString':
-                    queryResult = $(css3Request); // Don't merge with next line as intermediate queryResult may be needed by wrapFragment
-                    queryResult = wrapFragment(nodeArrayToSerializedArray(queryResult).join('')); // $(css3Request).toString(); handles merging
-                    break;
+            case 'attr': // Only gets one attribute anyways, so no need to handle differently for JSON (except the stringify below)
+                queryResult = $(css3Request).attr(css3Attr);
+                break;
+            case 'toArray':
+                queryResult = nodeArrayToSerializedArray($(css3Request)); // $(css3Request).toString(); handles merging
+                break;
+            // Todo: Change 'text' to return array of text nodes in case of JSON?
+            case 'text':
+                queryResult = $(css3Request)[type]();
+                break;
+            case 'toString':
+                queryResult = $(css3Request); // Don't merge with next line as intermediate queryResult may be needed by wrapFragment
+                queryResult = wrapFragment(nodeArrayToSerializedArray(queryResult).join('')); // $(css3Request).toString(); handles merging
+                break;
             }
-        }
-        else {
+        } else {
             queryResult = fileContents;
         }
 
         fileContents = isJSON ? JSON.stringify(queryResult) : queryResult;
-        
+
         write(res, 200, responseHeaders, fileContents);
     });
- 
+
 }).listen(1337, '127.0.0.1');
 console.log('Server running at http://127.0.0.1:1337/');
 

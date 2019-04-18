@@ -15,5 +15,5 @@ var JSToPeg = require('./JSToPeg'),
         }
     ),
     parsed = parser.parse('abba');
-    
+
 console.log(parsed);
