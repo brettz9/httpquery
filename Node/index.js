@@ -25,10 +25,12 @@ const debug = 1,
   };
 
 /**
- * @param {string} [cwd=process.cwd()]
+ * @param {PlainObject} [cfg]
  * @returns {void}
  */
-function getHttpQuery (cwd = process.cwd()) {
+function getHttpQuery (cfg = {}) {
+  const cwd = cfg.cwd ?? process.cwd();
+  const path = cfg.path ?? '';
   /**
    * @callback MiddlewareCallback
    * @returns {void}
@@ -82,7 +84,7 @@ function getHttpQuery (cwd = process.cwd()) {
 
     let fileContents;
     try {
-      fileContents = await readFile(join(cwd, './Node/', url));
+      fileContents = await readFile(join(cwd, path, url));
     } catch (err) {
       exitError(res, responseHeaders, err);
       return;

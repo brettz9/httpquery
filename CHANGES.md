@@ -1,5 +1,9 @@
 # CHANGES to httpquery
 
+## 0.3.0
+
+- feat: add `path` argument to getter
+
 ## 0.2.0
 
 - feat: switch to native ESM

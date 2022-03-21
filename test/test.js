@@ -9,8 +9,9 @@ describe('Retrieval', function () {
   this.timeout(20000);
 
   let port = 8090;
+  const hostBase = '127.0.0.1:';
   const getUrl = () => {
-    return ['http://127.0.0.1:' + (++port), port];
+    return ['http://' + hostBase + (++port), port];
   };
 
   beforeEach(function () {
@@ -36,7 +37,7 @@ describe('Retrieval', function () {
     });
     const {stdout, stderr} = await cliProm;
 
-    expect(stdout).to.equal(`Server running at 127.0.0.1:${this.port}/\n`);
+    expect(stdout).to.equal(`Server running at ${hostBase}${this.port}/\n`);
 
     expect(stderr).to.equal('');
 
@@ -73,7 +74,7 @@ describe('Retrieval', function () {
     });
     const {stdout, stderr} = await cliProm;
 
-    expect(stdout).to.equal(`Server running at 127.0.0.1:${this.port}/\n`);
+    expect(stdout).to.equal(`Server running at ${hostBase}${this.port}/\n`);
 
     expect(stderr).to.equal('');
 
@@ -105,7 +106,7 @@ describe('Retrieval', function () {
     });
     const {stdout, stderr} = await cliProm;
 
-    expect(stdout).to.equal(`Server running at 127.0.0.1:${this.port}/\n`);
+    expect(stdout).to.equal(`Server running at ${hostBase}${this.port}/\n`);
 
     expect(stderr).to.equal('');
 
@@ -139,7 +140,7 @@ describe('Retrieval', function () {
     });
     const {stdout, stderr} = await cliProm;
 
-    expect(stdout).to.equal(`Server running at 127.0.0.1:${jsonPort}/\n`);
+    expect(stdout).to.equal(`Server running at ${hostBase}${jsonPort}/\n`);
 
     expect(stderr).to.equal('');
 
