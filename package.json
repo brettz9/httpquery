@@ -4,8 +4,14 @@
   "author": "Brett Zamir",
   "contributors": [],
   "description": "HTTP query protocol with proof-of-concept implementations obtaining subsets of remote HTML data via XPath or CSS Selectors",
-  "main": "Node/index",
+  "main": "./Node/index.js",
+  "type": "module",
+  "exports": {
+    ".": "./Node/index.js"
+  },
   "scripts": {
+    "eslint": "eslint --ext=js,md,html,cjs .",
+    "lint": "npm run eslint --",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,9 +29,9 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "0.22.0",
-    "htteepee": "0.3.0",
-    "xmldom": "0.1.27",
-    "xpath": "0.0.24"
+    "htteepee": "0.5.0",
+    "xmldom": "0.6.0",
+    "xpath": "0.0.32"
   },
   "engines": {
     "node": ">= 7.7.4"
@@ -33,5 +39,24 @@
   "bugs": {
     "url": "https://github.com/brettz9/httpquery/issues"
   },
-  "homepage": "https://github.com/brettz9/httpquery#readme"
+  "homepage": "https://github.com/brettz9/httpquery#readme",
+  "devDependencies": {
+    "@brettz9/eslint-plugin": "^1.0.4",
+    "eslint": "^8.11.0",
+    "eslint-config-ash-nazg": "32.7.1",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-array-func": "^3.1.7",
+    "eslint-plugin-compat": "^4.0.2",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-html": "^6.2.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jsdoc": "^38.0.4",
+    "eslint-plugin-markdown": "^2.2.1",
+    "eslint-plugin-no-unsanitized": "^4.0.1",
+    "eslint-plugin-no-use-extend-native": "^0.5.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-sonarjs": "^0.12.0",
+    "eslint-plugin-unicorn": "^41.0.0"
+  }
 }

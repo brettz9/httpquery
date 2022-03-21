@@ -4,25 +4,13 @@
     <meta charset="utf-8" />
     <title>Parser test</title>
     <script src="parser.js"></script>
-    <script>
-var str = 'query=xpath';
-
-var testing = new Parser(
-    {
-        parameter: $(['attribute', 'LWSP', '=', 'LWSP', 'value'], $('abc'), /abc/i),
-        attribute: 'query',
-        /**
-        attribute: 'query2',
+/**
+        * attribute: 'query2',
         query2: 'query',
         // query2: 'query2', // to throw error
-        //*/
-        LWSP: /\s*/,
-        value: 'xpath'
-    }
-);
-
-/**
-// Working
+        // */', 'value'], $('abc'), /abc/i),
+    attribute/**
+ * // Working
 var b = [];
 testing.parse(str, 'parameter', null, null, null, function (prop, match, idx, isAggregate, useStringProperty, hasAlias, isAlias) {
     //if (prop !== this.startProperty) { // works to avoid largest aggregate
@@ -36,26 +24,34 @@ testing.parse(str, 'parameter', null, null, null, function (prop, match, idx, is
 });
 alert(b.join());
 throw 'exit';
-//*/
-
-testing.parse(str, 'parameter', {
-    'parameter': function (att, level) {
-        alert('parameter:' + att + ':' + level);
-    },
-    'attribute': function (att, level) {
-        alert('attribute:' + att + ':' + level);
-    },
-    'value': function (val, level) {
-        alert('value:' + val + ':' + level);
-    },
-    /*'LWSP': function (val, level) {
-        alert('LWSP:' + val + ':' + level);
-    },*/
-    '=': function (val, level) {
-        alert('equals:' + val + ':' + level);
+//
+*/ { // Get the deferenced item
+        !isAlias) { // Get the initial referencing item instead of dereferenced
+        b.push(prop);
     }
 });
+alert(b.join());
+throw 'exit';
+//
+*/
 
+testing.parse(str, 'parameter', {
+  parameter: function (att, level) {
+    alert('parameter:' + att + ':' + level);
+  },
+  attribute: function (att, level) {
+    alert('attribute:' + att + ':' + level);
+  },
+  value: function (val, level) {
+    alert('value:' + val + ':' + level);
+  },
+  /* 'LWSP': function (val, level) {
+        alert('LWSP:' + val + ':' + level);
+    }, */
+  '=' (val, level) {
+    alert('equals:' + val + ':' + level);
+  }
+});
     </script>
 </head>
 <body>
