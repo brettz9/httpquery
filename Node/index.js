@@ -8,21 +8,16 @@ import xpath from 'xpath';
 import xmldom from 'xmldom';
 import * as JSONPath from 'jsonpath-plus';
 
-const debug = 1,
-  ignoreQuerySupport = true,
-  Dom = xmldom.DOMParser, // https://npmjs.org/package/xmldom (npm install xmldom)
-  write = (res, code, responseHeaders, fileContents) => {
-    res.writeHead(code, responseHeaders);
-    res.end(fileContents); //  + '\n'
-  },
-  exitError = (res, responseHeaders, err) => {
-    const errorMessage = debug ? err : 'ERROR';
-    write(res, 404, responseHeaders, '<div style="color:red;font-weight:bold">' + errorMessage + '</div>');
-  },
-  clientSupportCheck = (req, str) => {
-    return req.headers['query-client-support'] &&
-            req.headers['query-client-support'].trim().split(/\s+/u).includes(str);
-  };
+const ignoreQuerySupport = true;
+
+const write = (res, code, responseHeaders, fileContents) => {
+  res.writeHead(code, responseHeaders);
+  res.end(fileContents); //  + '\n'
+};
+const clientSupportCheck = (req, str) => {
+  return req.headers['query-client-support'] &&
+          req.headers['query-client-support'].trim().split(/\s+/u).includes(str);
+};
 
 /**
  * @param {PlainObject} [cfg]
@@ -31,6 +26,13 @@ const debug = 1,
 function getHttpQuery (cfg = {}) {
   const cwd = cfg.cwd ?? process.cwd();
   const path = cfg.path ?? '';
+  const debug = cfg.debug ?? false;
+
+  const exitError = (res, responseHeaders, err) => {
+    const errorMessage = debug ? err : 'ERROR';
+    write(res, 404, responseHeaders, '<div style="color:red;font-weight:bold">' + errorMessage + '</div>');
+  };
+
   /**
    * @callback MiddlewareCallback
    * @returns {void}
@@ -44,28 +46,36 @@ function getHttpQuery (cfg = {}) {
    */
   return async function httpquery (req, res, next) {
     let url = req.url.slice(1) || 'index.html'; // Cut off initial slash
-    const
-      clientXPath1Support = clientSupportCheck(req, 'xpath1'),
-      clientCSS3Support = clientSupportCheck(req, 'css3'),
-      clientJSONPathSupport = clientSupportCheck(req, 'jsonpath'),
-      isXHTML = url.match(/\.xhtml/u),
-      isXML = url.match(/\.xml/u),
-      isTEI = url.match(/\.tei/u),
-      isJSON = url.match(/\.json/u),
-      isHTML = !(isXHTML || isXML || isTEI),
-      forceJSON = req.headers['query-format'] === 'json',
-      resultContentType = (isXHTML
-        ? 'application/xhtml+xml'
-        : isXML
-          ? 'application/xml'
-          : isTEI ? 'application/tei+xml' : 'text/html'),
-      responseHeaders = {
-        'Content-Type': isJSON || forceJSON ? 'application/json' : resultContentType
-      };
+    const clientXPath1Support = clientSupportCheck(req, 'xpath1');
+    const clientCSS3Support = clientSupportCheck(req, 'css3');
+    const clientJSONPathSupport = clientSupportCheck(req, 'jsonpath');
+    const isXHTML = url.match(/\.xhtml$/u);
+    const isXML = url.match(/\.xml$/u);
+    const isTEI = url.match(/\.tei$/u);
+    const isJSON = url.match(/\.json$/u);
+    const isJS = url.match(/\.js$/u);
+    const isCSS = url.match(/\.css$/u);
+    const isHTML = !(isXHTML || isXML || isTEI);
+    const forceJSON = req.headers['query-format'] === 'json';
+    const resultContentType = isXHTML
+      ? 'application/xhtml+xml'
+      : isXML
+        ? 'application/xml'
+        : isTEI
+          ? 'application/tei+xml'
+          : isJS
+            ? 'text/javascript'
+            : isCSS
+              ? 'text/css'
+              : 'text/html';
+    const responseHeaders = {
+      'Content-Type': isJSON || forceJSON ? 'application/json' : resultContentType
+    };
+
     url = (url.slice(-1) === '/' ? url + 'index.html' : url).replace(/\?.*$/u, '');
     // url = require('url').parse(url).pathname; // Need to strip off request parameters?
     // console.log('url:'+url);
-    if (isJSON || forceJSON) {
+    if (forceJSON) {
       responseHeaders['query-content-type'] = resultContentType;
     }
 
@@ -110,7 +120,7 @@ function getHttpQuery (cfg = {}) {
           return node.toString();
         });
       };
-      const doc = new Dom().parseFromString(String(fileContents));
+      const doc = new xmldom.DOMParser().parseFromString(String(fileContents));
       const xpath1Request = req.headers['query-request-xpath1'] && req.headers['query-request-xpath1'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
       queryResult = xpath.select(xpath1Request, doc);
       queryResult = forceJSON ? nodeArrayToSerializedArray(queryResult) : wrapFragment(nodeArrayToSerializedArray(queryResult).join(''));

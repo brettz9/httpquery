@@ -9,7 +9,8 @@ module.exports = {
 
   settings: {
     polyfills: [
-      'Promise'
+      'Promise',
+      'URL'
     ]
   },
 

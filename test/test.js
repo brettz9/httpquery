@@ -22,7 +22,12 @@ describe('Retrieval', function () {
     let cliProm;
     // eslint-disable-next-line promise/avoid-new -- Control
     const {html} = await new Promise((resolve, reject) => {
-      cliProm = spawnPromise(binPath, [this.port], 5000, async (stdout) => {
+      cliProm = spawnPromise(binPath, [
+        '-p',
+        this.port,
+        '--path',
+        'Node'
+      ], 5000, async (stdout) => {
         if (stdout.includes(this.port)) {
           try {
             const res = await fetch(this.basicUrl);
@@ -55,7 +60,12 @@ describe('Retrieval', function () {
     let cliProm;
     // eslint-disable-next-line promise/avoid-new -- Control
     const {html} = await new Promise((resolve, reject) => {
-      cliProm = spawnPromise(binPath, [this.port], 5000, async (stdout) => {
+      cliProm = spawnPromise(binPath, [
+        '-p',
+        this.port,
+        '--path',
+        'Node'
+      ], 5000, async (stdout) => {
         if (stdout.includes(this.port)) {
           try {
             const res = await fetch(this.basicUrl, {
@@ -87,7 +97,12 @@ describe('Retrieval', function () {
     let cliProm;
     // eslint-disable-next-line promise/avoid-new -- Control
     const {html} = await new Promise((resolve, reject) => {
-      cliProm = spawnPromise(binPath, [this.port], 5000, async (stdout) => {
+      cliProm = spawnPromise(binPath, [
+        '-p',
+        this.port,
+        '--path',
+        'Node'
+      ], 5000, async (stdout) => {
         if (stdout.includes(this.port)) {
           try {
             const res = await fetch(this.basicUrl, {
@@ -121,7 +136,12 @@ describe('Retrieval', function () {
     let cliProm;
     // eslint-disable-next-line promise/avoid-new -- Control
     const {html} = await new Promise((resolve, reject) => {
-      cliProm = spawnPromise(binPath, [jsonPort], 5000, async (stdout) => {
+      cliProm = spawnPromise(binPath, [
+        '-p',
+        jsonPort,
+        '--path',
+        'Node'
+      ], 5000, async (stdout) => {
         if (stdout.includes(jsonPort)) {
           try {
             const res = await fetch(jsonUrl + '/index.json', {

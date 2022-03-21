@@ -1,5 +1,13 @@
 # CHANGES to httpquery
 
+## 0.4.0
+
+- feat: BREAKING: proper CLI parsing; support `debug`, `path`, `cwd` arguments;
+  `port` and `host` arguments must now be named
+- fix: BREAKING: change default of `Node` to empty string for `path`
+- fix: proper content-type for CSS and JavaScript
+- test: run in parallel
+
 ## 0.3.0
 
 - feat: add `path` argument to getter

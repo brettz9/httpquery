@@ -1,6 +1,6 @@
 {
   "name": "httpquery",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Brett Zamir",
   "contributors": [],
   "description": "HTTP query protocol with proof-of-concept implementations obtaining subsets of remote HTML data via XPath or CSS Selectors",
@@ -13,10 +13,11 @@
     ".": "./Node/index.js"
   },
   "scripts": {
-    "start": "node Node/bin/index.js",
+    "build-cli": "clp -c Node/bin/optionDefinitions.js cli.svg",
+    "start": "node Node/bin/index.js --path=Node",
     "eslint": "eslint --ext=cjs,js,md,html .",
     "lint": "npm run eslint --",
-    "mocha": "mocha --require chai/register-expect.js",
+    "mocha": "mocha --parallel --require chai/register-expect.js",
     "test": "c8 --all npm run mocha"
   },
   "c8": {
@@ -44,6 +45,7 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "1.0.0-rc.10",
+    "command-line-basics": "^1.0.2",
     "jsonpath-plus": "^6.0.1",
     "xmldom": "^0.6.0",
     "xpath": "^0.0.32"
@@ -59,6 +61,7 @@
     "@brettz9/eslint-plugin": "^1.0.4",
     "c8": "^7.11.0",
     "chai": "^4.3.6",
+    "command-line-publish": "^1.1.0",
     "eslint": "^8.11.0",
     "eslint-config-ash-nazg": "32.7.1",
     "eslint-config-standard": "^16.0.3",
