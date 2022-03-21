@@ -5,6 +5,7 @@ import {readFile} from 'fs/promises';
 import cheerio from 'cheerio';
 import xpath from 'xpath';
 import xmldom from 'xmldom';
+import * as JSONPath from 'jsonpath-plus';
 
 const debug = 1,
   ignoreQuerySupport = true,
@@ -42,23 +43,25 @@ function getHttpQuery () {
     const
       clientXPath1Support = clientSupportCheck(req, 'xpath1'),
       clientCSS3Support = clientSupportCheck(req, 'css3'),
+      clientJSONPathSupport = clientSupportCheck(req, 'jsonpath'),
       isXHTML = url.match(/\.xhtml/u),
       isXML = url.match(/\.xml/u),
       isTEI = url.match(/\.tei/u),
+      isJSON = url.match(/\.json/u),
       isHTML = !(isXHTML || isXML || isTEI),
-      isJSON = req.headers['query-format'] === 'json',
+      forceJSON = req.headers['query-format'] === 'json',
       resultContentType = (isXHTML
         ? 'application/xhtml+xml'
         : isXML
           ? 'application/xml'
           : isTEI ? 'application/tei+xml' : 'text/html'),
       responseHeaders = {
-        'Content-Type': isJSON ? 'application/json' : resultContentType
+        'Content-Type': isJSON || forceJSON ? 'application/json' : resultContentType
       };
     url = (url.slice(-1) === '/' ? url + 'index.html' : url).replace(/\?.*$/u, '');
     // url = require('url').parse(url).pathname; // Need to strip off request parameters?
     // console.log('url:'+url);
-    if (isJSON) {
+    if (isJSON || forceJSON) {
       responseHeaders['query-content-type'] = resultContentType;
     }
 
@@ -92,7 +95,12 @@ function getHttpQuery () {
     };
 
     let queryResult;
-    if ((ignoreQuerySupport || clientXPath1Support) && req.headers['query-request-xpath1'] && !req.headers['query-full-request']) {
+    if ((ignoreQuerySupport || clientJSONPathSupport) && req.headers['query-request-jsonpath'] && !req.headers['query-full-request']) {
+      queryResult = JSON.stringify(JSONPath.JSONPath({
+        json: JSON.parse(fileContents.toString('utf8')),
+        path: req.headers['query-request-jsonpath'].trim()
+      }));
+    } else if ((ignoreQuerySupport || clientXPath1Support) && req.headers['query-request-xpath1'] && !req.headers['query-full-request']) {
       const nodeArrayToSerializedArray = (arr) => {
         return arr.map((node) => {
           return node.toString();
@@ -101,14 +109,14 @@ function getHttpQuery () {
       const doc = new Dom().parseFromString(String(fileContents));
       const xpath1Request = req.headers['query-request-xpath1'] && req.headers['query-request-xpath1'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
       queryResult = xpath.select(xpath1Request, doc);
-      queryResult = isJSON ? nodeArrayToSerializedArray(queryResult) : wrapFragment(nodeArrayToSerializedArray(queryResult).join(''));
+      queryResult = forceJSON ? nodeArrayToSerializedArray(queryResult) : wrapFragment(nodeArrayToSerializedArray(queryResult).join(''));
     } else if ((ignoreQuerySupport || clientCSS3Support) && req.headers['query-request-css3'] && !req.headers['query-full-request']) {
       // Support our own custom :text() and :attr(...) pseudo-classes (todo: do as (two-colon) pseudo-elements instead)
       const $ = cheerio.load(String(fileContents));
       // eslint-disable-next-line unicorn/no-unsafe-regex -- Todo
       const css3RequestFull = req.headers['query-request-css3'] && req.headers['query-request-css3'].trim().match(/(.*?)(?::(text|attr)\(([^)]*)\))?$/u); // Allow explicit "html" (toString) or "toArray" (or "json")?
       const css3Request = css3RequestFull[1];
-      const type = css3RequestFull[2] || (isJSON ? 'toArray' : 'toString');
+      const type = css3RequestFull[2] || (forceJSON ? 'toArray' : 'toString');
       const css3Attr = css3RequestFull[3];
 
       const nodeArrayToSerializedArray = (items) => {
@@ -138,10 +146,10 @@ function getHttpQuery () {
         break;
       }
     } else {
-      queryResult = fileContents;
+      queryResult = fileContents.toString('utf8');
     }
 
-    fileContents = isJSON ? JSON.stringify(queryResult) : queryResult;
+    fileContents = forceJSON ? JSON.stringify(queryResult) : queryResult;
 
     write(res, 200, responseHeaders, fileContents);
 
