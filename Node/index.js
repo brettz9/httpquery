@@ -2,6 +2,7 @@
 // Use JSDOM or http://zombie.labnotes.org/ ?
 
 import {readFile} from 'fs/promises';
+import {join} from 'path';
 import cheerio from 'cheerio';
 import xpath from 'xpath';
 import xmldom from 'xmldom';
@@ -24,9 +25,10 @@ const debug = 1,
   };
 
 /**
+ * @param {string} [cwd=process.cwd()]
  * @returns {void}
  */
-function getHttpQuery () {
+function getHttpQuery (cwd = process.cwd()) {
   /**
    * @callback MiddlewareCallback
    * @returns {void}
@@ -80,7 +82,7 @@ function getHttpQuery () {
 
     let fileContents;
     try {
-      fileContents = await readFile('./Node/' + url);
+      fileContents = await readFile(join(cwd, './Node/', url));
     } catch (err) {
       exitError(res, responseHeaders, err);
       return;
