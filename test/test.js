@@ -74,4 +74,36 @@ describe('Retrieval', function () {
       `<b a="y">World</b>`
     );
   });
+
+  it('Gets XPath selector HTML', async function () {
+    let cliProm;
+    // eslint-disable-next-line promise/avoid-new -- Control
+    const {html} = await new Promise((resolve, reject) => {
+      cliProm = spawnPromise(binPath, [], 10000, async (stdout) => {
+        if (stdout.includes('1337')) {
+          try {
+            const res = await fetch(basicUrl, {
+              headers: {
+                'query-request-xpath1': '//@a'
+              }
+            });
+            resolve(
+              {html: await res.text()}
+            );
+          } catch (err) {
+            reject(err);
+          }
+        }
+      });
+    });
+    const {stdout, stderr} = await cliProm;
+
+    expect(stdout).to.equal('Server running at 127.0.0.1:1337/\n');
+
+    expect(stderr).to.equal('');
+
+    expect(html).to.equal(
+      ` a="x" a="y"`
+    );
+  });
 });
