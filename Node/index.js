@@ -9,15 +9,15 @@ import xmldom from 'xmldom';
 const debug = 1,
   ignoreQuerySupport = true,
   Dom = xmldom.DOMParser, // https://npmjs.org/package/xmldom (npm install xmldom)
-  write = function (res, code, responseHeaders, fileContents) {
+  write = (res, code, responseHeaders, fileContents) => {
     res.writeHead(code, responseHeaders);
     res.end(fileContents); //  + '\n'
   },
-  exitError = function (res, responseHeaders, err) {
+  exitError = (res, responseHeaders, err) => {
     const errorMessage = debug ? err : 'ERROR';
     write(res, 404, responseHeaders, '<div style="color:red;font-weight:bold">' + errorMessage + '</div>');
   },
-  clientSupportCheck = function (req, str) {
+  clientSupportCheck = (req, str) => {
     return req.headers['query-client-support'] &&
             req.headers['query-client-support'].trim().split(/\s+/u).includes(str);
   };
@@ -83,11 +83,6 @@ function getHttpQuery () {
       return;
     }
 
-    let nodeArrayToSerializedArray = (arr) => {
-      return arr.map((node) => {
-        return node.toString();
-      });
-    };
     const wrapFragment = (frag) => {
       if (isHTML) { // || queryResult.length <= 1) { // No need to wrap for HTML or single result sets as no well-formedness requirements
         return frag;
@@ -98,6 +93,11 @@ function getHttpQuery () {
 
     let queryResult;
     if ((ignoreQuerySupport || clientXPath1Support) && req.headers['query-request-xpath1'] && !req.headers['query-full-request']) {
+      const nodeArrayToSerializedArray = (arr) => {
+        return arr.map((node) => {
+          return node.toString();
+        });
+      };
       const doc = new Dom().parseFromString(String(fileContents));
       const xpath1Request = req.headers['query-request-xpath1'] && req.headers['query-request-xpath1'].trim(); // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',
       queryResult = xpath.select(xpath1Request, doc);
@@ -111,11 +111,11 @@ function getHttpQuery () {
       const type = css3RequestFull[2] || (isJSON ? 'toArray' : 'toString');
       const css3Attr = css3RequestFull[3];
 
-      nodeArrayToSerializedArray = function (items) {
-        /* return arr.map(function (node) {
+      const nodeArrayToSerializedArray = (items) => {
+        /* return arr.map((node) => {
             return node; //.html();
         }); */
-        return [...items.map(function (i, elem) {
+        return [...items.map((i, elem) => {
           return $.html(elem);
         })];
       };
