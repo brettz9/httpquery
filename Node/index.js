@@ -1,7 +1,6 @@
 // Todo: Make this integratable into a pipeline; ensure can use HTML or XML DOM with content-type accordingly
 // Use JSDOM or http://zombie.labnotes.org/ ?
 
-import http from 'http';
 import {readFile} from 'fs/promises';
 import cheerio from 'cheerio';
 import xpath from 'xpath';
@@ -23,7 +22,18 @@ const debug = 1,
             req.headers['query-client-support'].trim().split(/\s+/u).includes(str);
   };
 
-http.createServer(async function (req, res) {
+/**
+ * @callback MiddlewareCallback
+ * @returns {void}
+ */
+
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {MiddlewareCallback} next
+ * @returns {void}
+ */
+async function httpquery (req, res, next) {
   let url = req.url.slice(1) || 'index.html'; // Cut off initial slash
   const
     clientXPath1Support = clientSupportCheck(req, 'xpath1'),
@@ -69,12 +79,12 @@ http.createServer(async function (req, res) {
     return;
   }
 
-  let nodeArrayToSerializedArray = function (arr) {
-    return arr.map(function (node) {
+  let nodeArrayToSerializedArray = (arr) => {
+    return arr.map((node) => {
       return node.toString();
     });
   };
-  const wrapFragment = function (frag) {
+  const wrapFragment = (frag) => {
     if (isHTML) { // || queryResult.length <= 1) { // No need to wrap for HTML or single result sets as no well-formedness requirements
       return frag;
     }
@@ -99,8 +109,8 @@ http.createServer(async function (req, res) {
 
     nodeArrayToSerializedArray = function (items) {
       /* return arr.map(function (node) {
-                  return node; //.html();
-              }); */
+          return node; //.html();
+      }); */
       return items.map(function (i, elem) {
         return $(this).toString();
       });
@@ -130,7 +140,11 @@ http.createServer(async function (req, res) {
   fileContents = isJSON ? JSON.stringify(queryResult) : queryResult;
 
   write(res, 200, responseHeaders, fileContents);
-}).listen(1337, '127.0.0.1');
 
-// eslint-disable-next-line no-console -- CLI
-console.log('Server running at http://127.0.0.1:1337/');
+  if (next) {
+    // eslint-disable-next-line node/callback-return -- Not that type
+    next();
+  }
+}
+
+export default httpquery;
