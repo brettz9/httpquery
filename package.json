@@ -16,7 +16,18 @@
     "start": "node Node/bin/index.js",
     "eslint": "eslint --ext=cjs,js,md,html .",
     "lint": "npm run eslint --",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "mocha": "mocha --require chai/register-expect.js",
+    "test": "c8 --all npm run mocha"
+  },
+  "c8": {
+    "reporter": [
+      "text"
+    ],
+    "exclude": [
+      "FFAddon",
+      "PHP",
+      "test"
+    ]
   },
   "repository": {
     "type": "git",
@@ -32,12 +43,12 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.10",
+    "cheerio": "1.0.0-rc.10",
     "xmldom": "^0.6.0",
     "xpath": "^0.0.32"
   },
   "engines": {
-    "node": "^12.0.0"
+    "node": "^14.0.0"
   },
   "bugs": {
     "url": "https://github.com/brettz9/httpquery/issues"
@@ -46,6 +57,7 @@
   "devDependencies": {
     "@brettz9/eslint-plugin": "^1.0.4",
     "c8": "^7.11.0",
+    "chai": "^4.3.6",
     "eslint": "^8.11.0",
     "eslint-config-ash-nazg": "32.7.1",
     "eslint-config-standard": "^16.0.3",
