@@ -13,6 +13,7 @@
     ".": "./Node/index.js"
   },
   "scripts": {
+    "prepublishOnly": "pnpm i",
     "build-cli": "clp -c Node/bin/optionDefinitions.js cli.svg",
     "start": "node Node/bin/index.js --path=Node",
     "eslint": "eslint --ext=cjs,js,md,html .",
