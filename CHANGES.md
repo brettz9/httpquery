@@ -1,5 +1,9 @@
 # CHANGES to httpquery
 
+## 0.6.3
+
+- fix: avoid erring on implicit `index.html` with query params
+
 ## 0.6.2
 
 - fix: avoid erring on implicit `index.html` with query params

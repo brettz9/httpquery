@@ -83,7 +83,7 @@ function getHttpQuery (cfg = {}) {
       }
     };
 
-    url = url.replace(/(\/|\/\?.*)$/u, '/index.html').replace(/\?.*$/u, '');
+    url = url.replace(/(\/|\/\?.*)$/u, '/index.html').replace(/\?.*$/u, '') || 'index.html';
     // url = require('url').parse(url).pathname; // Need to strip off request parameters?
     // console.log('url:'+url);
     if (forceJSON) {
