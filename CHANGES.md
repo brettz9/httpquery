@@ -1,9 +1,10 @@
 # CHANGES to httpquery
 
-## ?
+## 0.6.1
 
 - fix: BREAKING: switch to comma-separated `query-server-support` header,
   adding `jsonata`
+- fix: proper display of error messages
 
 ## 0.6.0
 

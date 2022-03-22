@@ -107,7 +107,7 @@ function getHttpQuery (cfg = {}) {
     try {
       fileContents = await readFile(join(cwd, path, url));
     } catch (err) {
-      exitError(res, responseHeaders, err);
+      exitError(res, responseHeaders, err.message);
       return;
     }
 
@@ -131,7 +131,7 @@ function getHttpQuery (cfg = {}) {
         // eslint-disable-next-line promise/prefer-await-to-callbacks -- jsonata API
         (error, result) => {
           if (error) {
-            exitError(res, responseHeaders, error);
+            exitError(res, responseHeaders, error.message);
             return;
           }
 
