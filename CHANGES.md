@@ -1,5 +1,9 @@
 # CHANGES to httpquery
 
+## 0.6.0
+
+- fix: BREAKING: rename `query-request-bindings` to `query-bindings`
+
 ## 0.5.0
 
 - fix: BREAKING/SECURITY: drop insecure `query-request-jsonpath` approach

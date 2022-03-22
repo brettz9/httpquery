@@ -124,7 +124,7 @@ function getHttpQuery (cfg = {}) {
       const jsonataExpression = jsonata(
         req.headers['query-jsonata'].trim()
       );
-      const bindings = req.headers['query-jsonata-bindings']?.trim();
+      const bindings = req.headers['query-bindings']?.trim();
       jsonataExpression.evaluate(
         JSON.parse(fileContents.toString('utf8')),
         bindings ? JSON.parse(bindings) : {},
