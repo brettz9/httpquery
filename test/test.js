@@ -70,7 +70,7 @@ describe('Retrieval', function () {
           try {
             const res = await fetch(this.basicUrl, {
               headers: {
-                'query-request-css3': 'b[a=y]'
+                'query-css3': 'b[a=y]'
               }
             });
             resolve(
@@ -107,7 +107,7 @@ describe('Retrieval', function () {
           try {
             const res = await fetch(this.basicUrl, {
               headers: {
-                'query-request-xpath1': '//@a'
+                'query-xpath1': '//@a'
               }
             });
             resolve(
@@ -130,7 +130,7 @@ describe('Retrieval', function () {
     );
   });
 
-  it('Gets JSONPath selector JSON', async function () {
+  it('Gets JSONata selector JSON', async function () {
     const [jsonUrl, jsonPort] = getUrl();
 
     let cliProm;
@@ -146,7 +146,7 @@ describe('Retrieval', function () {
           try {
             const res = await fetch(jsonUrl + '/index.json', {
               headers: {
-                'query-request-jsonpath': '$..jkl'
+                'query-jsonata': '**.jkl'
               }
             });
             resolve(

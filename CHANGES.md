@@ -1,5 +1,12 @@
 # CHANGES to httpquery
 
+## 0.5.0
+
+- fix: BREAKING/SECURITY: drop insecure `query-request-jsonpath` approach
+- refactor: BREAKING: rename `query-request-*` (`xpath1` and `css`) to drop
+  `request-`
+- feat: adds `query-jsonata` as new JSON querying option
+
 ## 0.4.0
 
 - feat: BREAKING: proper CLI parsing; support `debug`, `path`, `cwd` arguments;
