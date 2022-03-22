@@ -91,11 +91,11 @@ function getHttpQuery (cfg = {}) {
     }
 
     if (req.headers['query-client-support'] && !req.headers['query-xpath1'] && !req.headers['query-css3'] && !req.headers['query-full-request']) {
-      responseHeaders['query-server-support'] = 'xpath1 css3';
+      responseHeaders['query-server-support'] = 'xpath1, css3, jsonata';
       write(res, 200, responseHeaders, ''); // Don't waste bandwidth if client supports protocol and hasn't asked us to deliver the full document
       // Todo: we should allow delivery of a default payload (e.g., full doc if not specified as requesting empty for feature detection+immediate execution if supported)
     } else {
-      responseHeaders['query-server-support'] = 'xpath1 css3';
+      responseHeaders['query-server-support'] = 'xpath1, css3, jsonata';
     }
 
     if (!(/\w/u).test(url[0]) || (/\.\./u).test(url)) {

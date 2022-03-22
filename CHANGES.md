@@ -1,5 +1,10 @@
 # CHANGES to httpquery
 
+## ?
+
+- fix: BREAKING: switch to comma-separated `query-server-support` header,
+  adding `jsonata`
+
 ## 0.6.0
 
 - fix: BREAKING: rename `query-request-bindings` to `query-bindings`
