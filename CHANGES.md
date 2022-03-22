@@ -1,5 +1,10 @@
 # CHANGES to httpquery
 
+## 0.6.2
+
+- fix: avoid erring on implicit `index.html` with query params
+- fix: allow detection of XHTML with query params
+
 ## 0.6.1
 
 - fix: BREAKING: switch to comma-separated `query-server-support` header,

@@ -49,7 +49,7 @@ function getHttpQuery (cfg = {}) {
     const clientXPath1Support = clientSupportCheck(req, 'xpath1');
     const clientCSS3Support = clientSupportCheck(req, 'css3');
     const clientJSONPathSupport = clientSupportCheck(req, 'jsonpath');
-    const isXHTML = url.match(/\.xhtml$/u);
+    const isXHTML = url.match(/\.xhtml(\?.*)$/u);
     const isXML = url.match(/\.xml$/u);
     const isTEI = url.match(/\.tei$/u);
     const isJSON = url.match(/\.json$/u);
@@ -83,7 +83,7 @@ function getHttpQuery (cfg = {}) {
       }
     };
 
-    url = (url.slice(-1) === '/' ? url + 'index.html' : url).replace(/\?.*$/u, '');
+    url = url.replace(/(\/|\/\?.*)$/u, '/index.html').replace(/\?.*$/u, '');
     // url = require('url').parse(url).pathname; // Need to strip off request parameters?
     // console.log('url:'+url);
     if (forceJSON) {
