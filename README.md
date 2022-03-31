@@ -115,6 +115,10 @@ but in a web-friendly, hierarchical manner such as with https://github.com/krisz
 
 ## Ideas for possible future todos
 
+1. Support **[JSONiq](https://www.jsoniq.org/)** (XQuery-like power for JSON)
+1. Support **XQuery** (via [https://github.com/FontoXML/fontoxpath](fontoxpath)?)
+1. **Restore add-on** (as webextension) so can make queries and joins even to
+    non-httpquery sites!
 1. i18n-ize
 1. Add tests (especially ensuring content-type works properly with each mode)
 1. Add an Ajax site-independent web application, including ability to supply arbitrary URLs with cross-site headers or making AsYouWish requests (would be facilitated by https://bugzilla.mozilla.org/show_bug.cgi?id=880908 ; see also https://bugzilla.mozilla.org/show_bug.cgi?id=855936 )
