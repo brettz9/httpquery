@@ -1,6 +1,6 @@
-// Todo: Make this integratable into a pipeline; ensure can use HTML or XML
-//  DOM with content-type accordingly
-// Use JSDOM or http://zombie.labnotes.org/ ?
+// Todo: More middleware passing options besides jsonData; ensure can use
+//         HTML or XML DOM with content-type accordingly
+// Use JSDOM?
 
 import {readFile} from 'fs/promises';
 import {join} from 'path';
