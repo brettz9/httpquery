@@ -1,5 +1,10 @@
 # CHANGES to httpquery
 
+## 0.7.0
+
+- feat: Use any `req.jsonData` set by middleware
+- refactor: Improve code readability
+
 ## 0.6.3
 
 - fix: avoid erring on implicit `index.html` with query params
