@@ -243,7 +243,10 @@ function getHttpQuery (cfg = {}) {
       try {
         const directoryFile = join(path, url);
         if (directory && !directoryFile.startsWith(directory)) {
-          next();
+          if (next) {
+            next();
+            return;
+          }
           return;
         }
         fileContents = await readFile(join(cwd, directoryFile));

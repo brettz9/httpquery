@@ -1,5 +1,9 @@
 # CHANGES to httpquery
 
+## 0.8.2
+
+- fix: allow for absent `next`
+
 ## 0.8.1
 
 - fix: backwards logic re: detection of path
