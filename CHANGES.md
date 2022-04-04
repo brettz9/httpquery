@@ -1,5 +1,9 @@
 # CHANGES to httpquery
 
+## 0.8.1
+
+- fix: backwards logic re: detection of path
+
 ## 0.8.0
 
 - feat: support `directory` and `passthroughErrors`

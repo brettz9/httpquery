@@ -242,7 +242,7 @@ function getHttpQuery (cfg = {}) {
     if (!('jsonData' in req)) {
       try {
         const directoryFile = join(path, url);
-        if (directory && directoryFile.startsWith(directory)) {
+        if (directory && !directoryFile.startsWith(directory)) {
           next();
           return;
         }
