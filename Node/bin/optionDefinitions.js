@@ -24,8 +24,20 @@ const optionDefinitions = [
   },
   {
     name: 'path', type: String,
-    description: 'The path on top of `cwd`. Defaults to the empty string',
+    description: 'The path on top of `cwd`. This will be used for ' +
+      'comparisons with `directory`, Defaults to the empty string',
     typeLabel: '{underline PATH}'
+  },
+  {
+    name: 'directory', type: String,
+    description: 'Files not in this path (the `path` + `req.url`) will be ' +
+      'passed on to `next`. Defaults to none',
+    typeLabel: '{underline NAMESPACE}'
+  },
+  {
+    name: 'passthroughErrors', type: Boolean,
+    description: 'Whether to pass through errors with `next()`. Defaults to ' +
+      '`false`'
   },
   {
     name: 'debug', alias: 'd', type: Boolean,

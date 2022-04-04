@@ -24,7 +24,7 @@ const clientSupportCheck = (req, str) => {
 };
 
 const handleJsonata = ({
-  req, res, responseHeaders, fileContents, exitError, finish
+  req, res, responseHeaders, fileContents, exitError, finish, next
 }) => {
   const jsonataExpression = jsonata(
     req.headers['query-jsonata'].trim()
@@ -40,7 +40,7 @@ const handleJsonata = ({
     // eslint-disable-next-line promise/prefer-await-to-callbacks -- jsonata
     (error, result) => {
       if (error) {
-        exitError(res, responseHeaders, error.message);
+        exitError(res, responseHeaders, error.message, next);
         return;
       }
 
@@ -130,8 +130,16 @@ function getHttpQuery (cfg = {}) {
   const cwd = cfg.cwd ?? process.cwd();
   const path = cfg.path ?? '';
   const debug = cfg.debug ?? false;
+  const {directory, passthroughErrors} = cfg;
 
-  const exitError = (res, responseHeaders, err) => {
+  const exitError = (res, responseHeaders, err, next) => {
+    if (passthroughErrors) {
+      if (next) {
+        next(err);
+        return;
+      }
+      return;
+    }
     const errorMessage = debug ? err : 'ERROR';
     write(
       res, 404, responseHeaders,
@@ -220,7 +228,12 @@ function getHttpQuery (cfg = {}) {
     }
 
     if (!(/\w/u).test(url[0]) || (/\.\./u).test(url)) {
-      exitError(res, responseHeaders, 'Disallowed character in file name');
+      exitError(
+        res,
+        responseHeaders,
+        'Disallowed or missing character in file name',
+        next
+      );
       return;
     }
 
@@ -228,9 +241,14 @@ function getHttpQuery (cfg = {}) {
 
     if (!('jsonData' in req)) {
       try {
-        fileContents = await readFile(join(cwd, path, url));
+        const directoryFile = join(path, url);
+        if (directory && directoryFile.startsWith(directory)) {
+          next();
+          return;
+        }
+        fileContents = await readFile(join(cwd, directoryFile));
       } catch (err) {
-        exitError(res, responseHeaders, err.message);
+        exitError(res, responseHeaders, err.message, next);
         return;
       }
     }
@@ -254,7 +272,7 @@ function getHttpQuery (cfg = {}) {
         req.headers['query-jsonata'] && !req.headers['query-full-request']
     ) {
       handleJsonata({
-        req, res, responseHeaders, fileContents, exitError, finish
+        req, res, responseHeaders, fileContents, exitError, finish, next
       });
       return;
     }

@@ -1,5 +1,10 @@
 # CHANGES to httpquery
 
+## 0.8.0
+
+- feat: support `directory` and `passthroughErrors`
+- fix: indicate character may also be missing in error message
+
 ## 0.7.0
 
 - feat: Use any `req.jsonData` set by middleware
