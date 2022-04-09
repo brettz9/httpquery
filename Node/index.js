@@ -190,17 +190,6 @@ function getHttpQuery (cfg = {}) {
         : resultContentType
     };
 
-    const finish = (queryResult) => {
-      fileContents = forceJSON ? JSON.stringify(queryResult) : queryResult;
-
-      write(res, 200, responseHeaders, fileContents);
-
-      if (next) {
-        // eslint-disable-next-line node/callback-return -- Not that type
-        next();
-      }
-    };
-
     url = url.replace(/(\/|\/\?.*)$/u, '/index.html').replace(/\?.*$/u, '') ||
       'index.html';
 
@@ -267,6 +256,17 @@ function getHttpQuery (cfg = {}) {
       return `<${tag}>${frag}</${
         tag.match(/^\w*/u)[0]
       }>`;
+    };
+
+    const finish = (queryResult) => {
+      fileContents = forceJSON ? JSON.stringify(queryResult) : queryResult;
+
+      write(res, 200, responseHeaders, fileContents);
+
+      if (next) {
+        // eslint-disable-next-line node/callback-return -- Not that type
+        next();
+      }
     };
 
     let queryResult;
