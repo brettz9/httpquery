@@ -1,5 +1,9 @@
 # CHANGES to httpquery
 
+## 0.8.3
+
+- fix: allow `engines` higher than 14
+
 ## 0.8.2
 
 - fix: allow for absent `next`
