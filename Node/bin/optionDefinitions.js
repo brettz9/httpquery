@@ -1,3 +1,4 @@
+/* eslint-disable n/no-sync -- Useful here */
 import {readFileSync} from 'fs';
 
 const pkg = JSON.parse(

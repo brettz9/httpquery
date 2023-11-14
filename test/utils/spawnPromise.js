@@ -11,7 +11,7 @@ import {spawn} from 'child_process';
  * @param {string} path
  * @param {PlainObject|string[]} opts
  * @param {string[]} args
- * @param {Integer} [killDelay=10000]
+ * @param {Integer} [killDelay]
  * @param {EventWatcher} watchEvents
  * @returns {Promise<SpawnResults>}
  */
@@ -51,7 +51,7 @@ const spawnPromise = (
       reject(err);
     });
 
-    cli.on('close', (code) => {
+    cli.on('close', (/* code */) => {
       resolve({
         stdout,
         stderr

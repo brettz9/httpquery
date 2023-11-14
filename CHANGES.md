@@ -1,5 +1,9 @@
 # CHANGES to httpquery
 
+## 0.9.0
+
+- chore: update deps., devDeps.
+
 ## 0.8.3
 
 - fix: allow `engines` higher than 14

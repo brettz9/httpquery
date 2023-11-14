@@ -9,7 +9,6 @@ import getHttpQuery from '../index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-(async () => {
 const args = await cliBasics(
   join(__dirname, 'optionDefinitions.js')
 );
@@ -28,4 +27,3 @@ server.on('listening', () => {
 });
 
 server.listen(port, host);
-})();

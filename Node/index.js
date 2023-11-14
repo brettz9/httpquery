@@ -4,7 +4,7 @@
 
 import {readFile} from 'fs/promises';
 import {join} from 'path';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import xpath from 'xpath';
 import xmldom from 'xmldom';
 import jsonata from 'jsonata';
@@ -23,31 +23,27 @@ const clientSupportCheck = (req, str) => {
     ).includes(str);
 };
 
-const handleJsonata = ({
+const handleJsonata = async ({
   req, res, responseHeaders, fileContents, exitError, finish, next
 }) => {
   const jsonataExpression = jsonata(
     req.headers['query-jsonata'].trim()
   );
   const bindings = req.headers['query-bindings']?.trim();
-  jsonataExpression.evaluate(
-    'jsonData' in req
-      ? req.jsonData
-      : JSON.parse(fileContents.toString('utf8')),
-    bindings
-      ? JSON.parse(bindings)
-      : {},
-    // eslint-disable-next-line promise/prefer-await-to-callbacks -- jsonata
-    (error, result) => {
-      if (error) {
-        exitError(res, responseHeaders, error.message, next);
-        return;
-      }
-
-      const queryResult = JSON.stringify(result);
-      finish(queryResult);
-    }
-  );
+  try {
+    const result = await jsonataExpression.evaluate(
+      'jsonData' in req
+        ? req.jsonData
+        : JSON.parse(fileContents.toString('utf8')),
+      bindings
+        ? JSON.parse(bindings)
+        : {}
+    );
+    const queryResult = JSON.stringify(result);
+    finish(queryResult);
+  } catch (error) {
+    exitError(res, responseHeaders, error.message, next);
+  }
 };
 
 const handleXpath1 = ({
@@ -82,14 +78,13 @@ const handleCSS3 = ({req, fileContents, forceJSON, wrapFragment}) => {
     type = forceJSON ? 'toArray' : 'toString',
     css3Attr
   ] = (req.headers['query-css3'] && req.headers['query-css3'].trim().match(
-    // eslint-disable-next-line unicorn/no-unsafe-regex -- Todo
     /(.*?)(?::(text|attr)\(([^)]*)\))?$/u
   )) || []; // Allow explicit "html" (toString) or "toArray" (or "json")?
 
   const nodeArrayToSerializedArray = (items) => {
-    return [...items.map((i, elem) => {
+    return [...items].map((elem) => {
       return $.html(elem);
-    })];
+    });
   };
 
   let queryResult;
@@ -264,7 +259,7 @@ function getHttpQuery (cfg = {}) {
       write(res, 200, responseHeaders, fileContents);
 
       if (next) {
-        // eslint-disable-next-line node/callback-return -- Not that type
+        // eslint-disable-next-line n/callback-return -- Not that type
         next();
       }
     };
@@ -274,7 +269,7 @@ function getHttpQuery (cfg = {}) {
       (ignoreQuerySupport || clientJSONPathSupport) &&
         req.headers['query-jsonata'] && !req.headers['query-full-request']
     ) {
-      handleJsonata({
+      await handleJsonata({
         req, res, responseHeaders, fileContents, exitError, finish, next
       });
       return;
