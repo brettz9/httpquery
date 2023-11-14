@@ -2,6 +2,7 @@
 
 ## 0.9.0
 
+- feat: switch to JSDOM
 - chore: update deps., devDeps.
 
 ## 0.8.3

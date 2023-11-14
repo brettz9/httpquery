@@ -6,8 +6,11 @@ import {readFile} from 'fs/promises';
 import {join} from 'path';
 import * as cheerio from 'cheerio';
 import xpath from 'xpath';
-import xmldom from 'xmldom';
+// import xmldom from 'xmldom';
 import jsonata from 'jsonata';
+import {JSDOM} from 'jsdom';
+
+const {window: win} = new JSDOM();
 
 const ignoreQuerySupport = true;
 
@@ -51,10 +54,17 @@ const handleXpath1 = ({
 }) => {
   const nodeArrayToSerializedArray = (arr) => {
     return arr.map((node) => {
-      return node.toString();
+      if (node.nodeType === 2) {
+        return ` ${node.name}="${node.value}"`;
+      }
+      return new win.XMLSerializer().serializeToString(
+        node
+      );
     });
   };
-  const doc = new xmldom.DOMParser().parseFromString(String(fileContents));
+  const doc = new win.DOMParser().parseFromString(
+    String(fileContents), 'text/xml'
+  );
   const xpath1Request = req.headers['query-xpath1'] &&
     req.headers['query-xpath1'].trim();
     // || '//b[position() > 1 and position() < 4]'; // || '//b/text()',

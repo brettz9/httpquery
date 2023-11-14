@@ -47,8 +47,8 @@
   "dependencies": {
     "cheerio": "1.0.0-rc.12",
     "command-line-basics": "^2.0.0",
+    "jsdom": "^22.1.0",
     "jsonata": "^2.0.3",
-    "xmldom": "^0.6.0",
     "xpath": "^0.0.33"
   },
   "engines": {
