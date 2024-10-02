@@ -1,6 +1,6 @@
 {
   "name": "httpquery",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "author": "Brett Zamir",
   "contributors": [],
   "description": "HTTP query protocol with proof-of-concept implementations obtaining subsets of remote HTML data via XPath or CSS Selectors",
@@ -16,9 +16,9 @@
     "prepublishOnly": "pnpm i",
     "build-cli": "clp -c Node/bin/optionDefinitions.js cli.svg",
     "start": "node Node/bin/index.js --path=Node",
-    "eslint": "eslint --ext=cjs,js,md,html .",
+    "eslint": "eslint .",
     "lint": "npm run eslint --",
-    "mocha": "mocha --parallel --require chai/register-expect.js",
+    "mocha": "mocha --parallel",
     "test": "c8 --all npm run mocha"
   },
   "c8": {
@@ -26,6 +26,8 @@
       "text"
     ],
     "exclude": [
+      ".ncurc.cjs",
+      "eslint.config.js",
       "FFAddon",
       "PHP",
       "test"
@@ -46,40 +48,25 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "1.0.0-rc.12",
-    "command-line-basics": "^2.0.0",
-    "jsdom": "^22.1.0",
-    "jsonata": "^2.0.3",
-    "xpath": "^0.0.33"
+    "command-line-basics": "^2.0.1",
+    "jsdom": "^25.0.1",
+    "jsonata": "^2.0.5",
+    "xpath": "^0.0.34"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "bugs": {
     "url": "https://github.com/brettz9/httpquery/issues"
   },
   "homepage": "https://github.com/brettz9/httpquery#readme",
   "devDependencies": {
-    "@brettz9/eslint-plugin": "^1.0.4",
-    "c8": "^8.0.1",
-    "chai": "^4.3.10",
+    "c8": "^10.1.2",
+    "chai": "^5.1.1",
     "command-line-publish": "^1.1.0",
-    "eslint": "^8.53.0",
-    "eslint-config-ash-nazg": "35.1.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-array-func": "^4.0.0",
-    "eslint-plugin-compat": "^4.2.0",
-    "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-html": "^7.1.0",
-    "eslint-plugin-import": "^2.29.0",
-    "eslint-plugin-jsdoc": "^46.9.0",
-    "eslint-plugin-markdown": "^3.0.1",
-    "eslint-plugin-no-unsanitized": "^4.0.2",
-    "eslint-plugin-no-use-extend-native": "^0.5.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-sonarjs": "^0.23.0",
-    "eslint-plugin-unicorn": "^49.0.0",
-    "mocha": "^10.2.0",
+    "eslint": "^9.11.1",
+    "eslint-config-ash-nazg": "36.19.0",
+    "mocha": "^10.7.3",
     "node-fetch": "^3.3.2"
   }
 }

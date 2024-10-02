@@ -1,5 +1,12 @@
 # CHANGES to httpquery
 
+## 0.10.0 (unreleased)
+
+BREAKING CHANGE:
+- Require Node 18+
+
+- chore: update deps. and devDeps. and lint
+
 ## 0.9.0
 
 - feat: switch to JSDOM

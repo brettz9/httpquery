@@ -2,3 +2,4 @@ test
 coverage
 FFAddon
 pnpm-lock.yaml
+eslint.config.js

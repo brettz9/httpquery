@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-shadow -- Familiar API
 import fetch from 'node-fetch';
+import {expect} from 'chai';
 
 import spawnPromise from './utils/spawnPromise.js';
 
@@ -11,6 +12,7 @@ describe('Retrieval', function () {
   let port = 8090;
   const hostBase = '127.0.0.1:';
   const getUrl = () => {
+    // eslint-disable-next-line sonarjs/no-clear-text-protocols -- Testing
     return ['http://' + hostBase + (++port), port];
   };
 
