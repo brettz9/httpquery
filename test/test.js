@@ -20,6 +20,25 @@ describe('Retrieval', function () {
     [this.basicUrl, this.port] = getUrl();
   });
 
+  it('Gets help', async function () {
+    let cliProm;
+    // eslint-disable-next-line promise/avoid-new -- Control
+    await new Promise((resolve) => {
+      cliProm = spawnPromise(binPath, [
+        '-h'
+      ], 5000, (stdout) => {
+        if (stdout.includes('help')) {
+          resolve();
+        }
+      });
+    });
+    const {stdout, stderr} = await cliProm;
+
+    expect(stdout).to.include(`HTTP query protocol with proof-of-concept implementations`);
+
+    expect(stderr).to.equal('');
+  });
+
   it('Gets baseline HTML', async function () {
     let cliProm;
     // eslint-disable-next-line promise/avoid-new -- Control
