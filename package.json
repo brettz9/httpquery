@@ -54,7 +54,7 @@
     "xpath": "^0.0.34"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "^20.11.0 || >=22.0.0"
   },
   "bugs": {
     "url": "https://github.com/brettz9/httpquery/issues"

@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 
 import http from 'http';
-import {join, dirname} from 'path';
-import {fileURLToPath} from 'url';
 
 import {cliBasics} from 'command-line-basics';
 import getHttpQuery from '../index.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
 const args = await cliBasics(
-  join(__dirname, 'optionDefinitions.js')
+  import.meta.dirname + '/optionDefinitions.js',
+  {
+    packageJsonPath: import.meta.dirname + '/../package.json'
+  }
 );
 if (!args) { // cliBasics handled
   process.exit(0);
