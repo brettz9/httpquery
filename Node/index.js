@@ -22,7 +22,7 @@ const write = (res, code, responseHeaders, fileContents) => {
 const clientSupportCheck = (req, str) => {
   return req.headers['query-client-support'] &&
     req.headers['query-client-support'].trim().split(
-      /\s+/u
+      /\s+/v
     ).includes(str);
 };
 
@@ -88,7 +88,7 @@ const handleCSS3 = ({req, fileContents, forceJSON, wrapFragment}) => {
     type = forceJSON ? 'toArray' : 'toString',
     css3Attr
   ] = (req.headers['query-css3'] && req.headers['query-css3'].trim().match(
-    /(.*?)(?::(text|attr)\(([^)]*)\))?$/u
+    /(.*?)(?::(text|attr)\(([^\)]*)\))?$/v
   )) || []; // Allow explicit "html" (toString) or "toArray" (or "json")?
 
   const nodeArrayToSerializedArray = (items) => {
@@ -168,12 +168,12 @@ function getHttpQuery (cfg = {}) {
     const clientXPath1Support = clientSupportCheck(req, 'xpath1');
     const clientCSS3Support = clientSupportCheck(req, 'css3');
     const clientJSONPathSupport = clientSupportCheck(req, 'jsonpath');
-    const isXHTML = url.match(/\.xhtml(\?.*)$/u);
-    const isXML = url.match(/\.xml$/u);
-    const isTEI = url.match(/\.tei$/u);
-    const isJSON = url.match(/\.json$/u);
-    const isJS = url.match(/\.js$/u);
-    const isCSS = url.match(/\.css$/u);
+    const isXHTML = url.match(/\.xhtml(\?.*)$/v);
+    const isXML = url.match(/\.xml$/v);
+    const isTEI = url.match(/\.tei$/v);
+    const isJSON = url.match(/\.json$/v);
+    const isJS = url.match(/\.js$/v);
+    const isCSS = url.match(/\.css$/v);
     const isHTML = !(isXHTML || isXML || isTEI);
     const forceJSON = req.headers['query-format'] === 'json';
 
@@ -195,7 +195,7 @@ function getHttpQuery (cfg = {}) {
         : resultContentType
     };
 
-    url = url.replace(/(\/|\/\?.*)$/u, '/index.html').replace(/\?.*$/u, '') ||
+    url = url.replace(/(\/|\/\?.*)$/v, '/index.html').replace(/\?.*$/v, '') ||
       'index.html';
 
     // Need to strip off request parameters?
@@ -221,7 +221,7 @@ function getHttpQuery (cfg = {}) {
       responseHeaders['query-server-support'] = 'xpath1, css3, jsonata';
     }
 
-    if (!(/\w/u).test(url[0]) || (/\.\./u).test(url)) {
+    if (!(/\w/v).test(url[0]) || (/\.\./v).test(url)) {
       exitError(
         res,
         responseHeaders,
@@ -259,7 +259,7 @@ function getHttpQuery (cfg = {}) {
       }
       const tag = 'div xmlns="http://www.w3.org/1999/xhtml"';
       return `<${tag}>${frag}</${
-        tag.match(/^\w*/u)[0]
+        tag.match(/^\w*/v)[0]
       }>`;
     };
 

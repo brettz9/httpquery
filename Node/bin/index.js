@@ -8,7 +8,7 @@ import getHttpQuery from '../index.js';
 const args = await cliBasics(
   import.meta.dirname + '/optionDefinitions.js',
   {
-    packageJsonPath: import.meta.dirname + '/../package.json'
+    packageJsonPath: import.meta.dirname + '/../../package.json'
   }
 );
 if (!args) { // cliBasics handled
