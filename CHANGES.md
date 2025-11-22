@@ -3,7 +3,7 @@
 ## 0.10.0 (unreleased)
 
 BREAKING CHANGE:
-- Require Node ^20.11.0 || >= 22.0.0
+- Require Node ^20.11.0 || >= 22.16.0
 
 - fix: supply `command-line-basics` notifier info
 - chore: update deps. and devDeps. and lint
