@@ -26,7 +26,7 @@
       "text"
     ],
     "exclude": [
-      ".ncurc.cjs",
+      ".ncurc.js",
       "eslint.config.js",
       "FFAddon",
       "PHP",
